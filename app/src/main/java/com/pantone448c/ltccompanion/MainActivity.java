@@ -2,12 +2,21 @@ package com.pantone448c.ltccompanion;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Toast;
 
 import com.google.transit.realtime.GtfsRealtime;
 
+import java.io.FileReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.URL;
+
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVRecord;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -15,6 +24,35 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+    }
+
+
+    public void exampleCSVReader()
+    {
+        try
+        {
+            InputStream in = getResources().openRawResource(R.raw.routes);
+            Reader read = new InputStreamReader(in);
+            Iterable<CSVRecord> records = CSVFormat.RFC4180.parse(read);
+            int count = 0;
+            for (CSVRecord record : records)
+            {
+                if (count > 0) //skip the first row because it will have the headers and I'm not sure how to get it to skip headers automatically
+                {
+                    record.get(0);//reads the first column and returns a string
+                    record.get(1);//reads the second column and returns a string
+                    record.get(2);//reads the third column and returns a string
+                    record.get(3);//reads the fourth column and returns a string
+                }
+                ++count;
+            }
+        }
+        catch (Exception ex)//generic exception to save time
+        {
+            Toast myToast2 = Toast.makeText(this, "uh oh... something went wrong", Toast.LENGTH_LONG);
+            myToast2.show();
+        }
+
     }
 
     public void download(View view) {
@@ -36,5 +74,9 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }).start();
+    }
+
+    public void parseCSV(View view) {
+        exampleCSVReader();
     }
 }
