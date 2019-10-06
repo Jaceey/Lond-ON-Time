@@ -1,22 +1,33 @@
 package com.pantone448c.ltccompanion;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 
+import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnSuccessListener;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private GoogleMap mMap;
     private static final int PERMISSION_ACCESS_FINE_LOCATION = 1;
@@ -26,7 +37,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     LatLng bullseye = new LatLng(42.98, -81.23);
     LatLng start = new LatLng(42.982600, -81.250000);
     LatLng budGardens = new LatLng(42.98237,-81.25255);
-   // private FusedLocationProviderClient fusedLocationClient;
+    private FusedLocationProviderClient fusedLocationClient;
     private final String TAG ="MyMaps";
 
 
@@ -45,10 +56,34 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             ActivityCompat.requestPermissions(this,
                     new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 1);
         }
-      //  googleApiClient = new GoogleApiClient.Builder(this, this, this).addApi(LocationServices.API).build();
-      //  fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        googleApiClient = new GoogleApiClient.Builder(this, this, this).addApi(LocationServices.API).build();
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
     }
 
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (googleApiClient != null) {
+            googleApiClient.connect();
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        googleApiClient.disconnect();
+        super.onStop();
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        Log.i(MapsActivity.class.getSimpleName(),"Connection suspended to Google Play Services!");
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        Log.i(MapsActivity.class.getSimpleName(), "Can't connect to Google Play Services!");
+    }
 
     /**
      * Manipulates the map once available.
@@ -69,4 +104,29 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
 
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        Log.i(TAG, "Connected to Google Play Services!");
+        // get the current location
+        fusedLocationClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>(){
+            @Override
+            public void onSuccess(Location lastLocation) {
+            // Got last known location. In some rare situations this can be null.
+            if (lastLocation != null) {
+                // Logic to handle location object
+                double lat = lastLocation.getLatitude(), lon = lastLocation.getLongitude();
+                loc = new LatLng(lat, lon);
+                Log.i(TAG, loc.toString());
+                // Add a BLUE marger to current location and zoom
+                // use reverse geocoding to get the current address at your location
+                mMap.addMarker(new MarkerOptions().position(loc)
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+                       // .title(getCurrAddress()).snippet("Your location Lat:"+loc.latitude + ", Lng:" + loc.longitude));
+                mMap.moveCamera(CameraUpdateFactory.newLatLng(loc));
+                // animate camera allows zoom
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(loc,14));
+            }
+            }
+        });
+    }
 }
