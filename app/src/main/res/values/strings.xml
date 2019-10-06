@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">London Public Transit Service Companion</string>
+    <string name="title_activity_maps">Map</string>
 </resources>
