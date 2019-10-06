@@ -1,10 +1,14 @@
 package com.pantone448c.ltccompanion;
 
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.View;
 
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -15,6 +19,16 @@ import com.google.android.gms.maps.model.MarkerOptions;
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
+    private static final int PERMISSION_ACCESS_FINE_LOCATION = 1;
+    private GoogleApiClient googleApiClient;
+    private LatLng loc;
+    // Fanshawe  43.012440, -81.200180
+    LatLng bullseye = new LatLng(42.98, -81.23);
+    LatLng start = new LatLng(42.982600, -81.250000);
+    LatLng budGardens = new LatLng(42.98237,-81.25255);
+   // private FusedLocationProviderClient fusedLocationClient;
+    private final String TAG ="MyMaps";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,6 +38,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        // Checks if ACCESS_FINE_LOCATION permission is granted
+        if (ContextCompat.checkSelfPermission(this,
+                android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+        }
+      //  googleApiClient = new GoogleApiClient.Builder(this, this, this).addApi(LocationServices.API).build();
+      //  fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
     }
 
 
