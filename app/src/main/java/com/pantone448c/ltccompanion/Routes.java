@@ -4,8 +4,15 @@ import android.util.Log;
 
 import java.util.TreeMap;
 
+/**
+ * Contains a singleton to store all the Routes
+ */
 public final class Routes {
 
+    /**
+     *
+     * @param routes the actual TreeMap of routes, accessed by routeid
+     */
     public static void LoadRoutes(final TreeMap<Integer, Route> routes)
     {
         if (_routes == null)

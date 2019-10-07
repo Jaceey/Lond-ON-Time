@@ -13,7 +13,16 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.TreeMap;
 
+/**
+ * Contains helper functions for parsing GTFS Static Data
+ */
 public class GTFSStaticData {
+
+    /**
+     *
+     * @param in An input stream pointing to the routes.txt file
+     * @return a TreeMap of Route objects with all the routes in routes.txt
+     */
     public static TreeMap<Integer, Route> getRoutes(InputStream in)
     {
         TreeMap<Integer, Route> routes = new TreeMap<>();
@@ -55,6 +64,14 @@ public class GTFSStaticData {
         return routes;
     }
 
+    /**
+     *
+     * @param in An input stream to the trips.txt file
+     * @param route_id The bus route id for the specific trip
+     * @param direction The direction of the trip you're looking for
+     * @param numTrips The number of trips you want to look up, 0 for all trips
+     * @return an Array of Trip Objects
+     */
     public static final Trip[] getTripsByRouteDirection(InputStream in, int route_id, Direction direction, int numTrips)
     {
         ArrayList<Trip> trips = new ArrayList<>();
