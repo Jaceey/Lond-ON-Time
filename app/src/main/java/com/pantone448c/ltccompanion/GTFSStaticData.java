@@ -39,7 +39,7 @@ public class GTFSStaticData {
                         route_text_colour = Integer.parseInt(record.get(8), 16);
                     }
                     Route route = new Route(route_id, route_name, route_colour, route_text_colour);
-                    routes.put(route_name, route);
+                    routes.put(route_id, route);
                 }
                 ++count;
             }
