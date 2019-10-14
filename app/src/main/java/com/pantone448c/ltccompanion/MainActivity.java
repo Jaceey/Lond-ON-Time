@@ -65,6 +65,8 @@ public class MainActivity extends AppCompatActivity {
                     GtfsRealtime.FeedMessage feed = GtfsRealtime.FeedMessage.parseFrom(url.openStream());
                     GtfsRealtime.FeedMessage feed2 = GtfsRealtime.FeedMessage.parseFrom(url2.openStream());
                     GtfsRealtime.FeedMessage feed3 = GtfsRealtime.FeedMessage.parseFrom(url3.openStream());
+                    GtfsRealtime.FeedEntity test;
+
                 }
                 catch (Exception ex)
                 {
