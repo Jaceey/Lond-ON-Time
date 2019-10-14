@@ -54,7 +54,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void download(View view) {
-        GtfsRealtime.VehiclePosition[] test = LTCLiveFeed.Instance().getVehiclePositions();
+        //GtfsRealtime.TripUpdate[] test = LTCLiveFeed.Instance().getTripUpdates(3963);
+        //GtfsRealtime.VehiclePosition[] test2 = LTCLiveFeed.Instance().getVehiclePositions(3963);
+        GtfsRealtime.Alert[] test3 = LTCLiveFeed.Instance().getAlerts();
         Toast myToast = Toast.makeText(this, "Well it didn't crash so that's a start!", Toast.LENGTH_LONG);
         myToast.show();
         /*new Thread(new Runnable() {
