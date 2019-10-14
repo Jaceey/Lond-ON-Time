@@ -54,7 +54,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void download(View view) {
-        new Thread(new Runnable() {
+        GtfsRealtime.VehiclePosition[] test = LTCLiveFeed.Instance().getVehiclePositions();
+        Toast myToast = Toast.makeText(this, "Well it didn't crash so that's a start!", Toast.LENGTH_LONG);
+        myToast.show();
+        /*new Thread(new Runnable() {
             @Override
             public void run() {
                 try
@@ -73,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
 
                 }
             }
-        }).start();
+        }).start();*/
     }
 
     public void parseCSV(View view) {

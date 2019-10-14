@@ -2,7 +2,7 @@ package com.pantone448c.ltccompanion;
 
 import android.util.Log;
 
-import com.google.transit.realtime.GtfsRealtime;
+import com.google.transit.realtime.GtfsRealtime.FeedEntity;
 import com.google.transit.realtime.GtfsRealtime.VehiclePosition;
 import com.google.transit.realtime.GtfsRealtime.VehicleDescriptor;
 import com.google.transit.realtime.GtfsRealtime.Alert;
@@ -47,10 +47,13 @@ public class LTCLiveFeed {
             feedThread.join(); //this seems inneficient, I wonder if there is a way to reuse the same thread for all of this, or one thread for each feed that just constantly pulls data when it's not suspended
             VehiclePosition[] vehiclePositionsList = new VehiclePosition[vehiclePositions.getEntities().length];
             int count = 0;
-            for (GtfsRealtime.FeedEntity entity : vehiclePositions.getEntities())
+            for (FeedEntity entity : vehiclePositions.getEntities())
             {
-               vehiclePositionsList[count] = entity.getVehicle();
-               ++count;
+                if (entity.hasVehicle())
+                {
+                    vehiclePositionsList[count] = entity.getVehicle();
+                }
+                ++count;
             }
             return vehiclePositionsList;
         }
@@ -60,6 +63,88 @@ public class LTCLiveFeed {
         }
         return new VehiclePosition[]{}; //return an empty list as a default
     }
+
+    public TripUpdate[] getTripUpdates() {
+        try {
+            if (feedThread != null) {
+                feedThread.join(); //wait for the thread to finish executing before we create a new thread
+            }
+            feedThread = new Thread(tripUpdates);
+            feedThread.start();
+            feedThread.join(); //this seems inneficient, I wonder if there is a way to reuse the same thread for all of this, or one thread for each feed that just constantly pulls data when it's not suspended
+            TripUpdate[] tripUpdateList = new TripUpdate[tripUpdates.getEntities().length];
+            int count = 0;
+            for (FeedEntity entity : tripUpdates.getEntities())
+            {
+                if (entity.hasTripUpdate())
+                {
+                    tripUpdateList[count] = entity.getTripUpdate();
+                }
+                ++count;
+            }
+            return tripUpdateList;
+        }
+        catch(InterruptedException ex)
+        {
+            Log.e("InterruptedException", ex.getMessage());
+        }
+        return new TripUpdate[]{}; //return an empty list as a default
+    }
+
+    public Alert[] getAlerts() {
+        try {
+            if (feedThread != null) {
+                feedThread.join(); //wait for the thread to finish executing before we create a new thread
+            }
+            feedThread = new Thread(alerts);
+            feedThread.start();
+            feedThread.join(); //this seems inneficient, I wonder if there is a way to reuse the same thread for all of this, or one thread for each feed that just constantly pulls data when it's not suspended
+            Alert[] alertList = new Alert[alerts.getEntities().length];
+            int count = 0;
+            for (FeedEntity entity : tripUpdates.getEntities())
+            {
+                if (entity.hasAlert())
+                {
+                    alertList[count] = entity.getAlert();
+                }
+                ++count;
+            }
+            return alertList;
+        }
+        catch(InterruptedException ex)
+        {
+            Log.e("InterruptedException", ex.getMessage());
+        }
+        return new Alert[]{}; //return an empty list as a default
+    }
+
+    /*
+    public VehicleDescriptor[] getVehicleDescriptors() {
+        try {
+            if (feedThread != null)
+            {
+                feedThread.join();
+            }
+            feedThread = new Thread();
+            feedThread.start();
+            feedThread.join(); //this seems inneficient, I wonder if there is a way to reuse the same thread for all of this, or one thread for each feed that just constantly pulls data when it's not suspended
+            VehiclePosition[] vehiclePositionsList = new VehiclePosition[vehiclePositions.getEntities().length];
+            int count = 0;
+            for (GtfsRealtime.FeedEntity entity : vehiclePositions.getEntities())
+            {
+                if (entity.hasVehicle())
+                {
+                    vehiclePositionsList[count] = entity.getVehicle();
+                }
+                ++count;
+            }
+            return vehiclePositionsList;
+        }
+        catch(InterruptedException ex)
+        {
+            Log.e("InterruptedException", ex.getMessage());
+        }
+    }*/
 
     private GTFSFeedReader vehiclePositions;
     private GTFSFeedReader tripUpdates;
