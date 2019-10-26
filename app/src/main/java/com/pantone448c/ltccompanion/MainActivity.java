@@ -88,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onViewMapClick(View view) {
-        Intent intent = new Intent(this, MapsActivity.class);
+        Intent intent = new Intent(this, MapBoxActivity.class);
         startActivity(intent);
     }
 }
