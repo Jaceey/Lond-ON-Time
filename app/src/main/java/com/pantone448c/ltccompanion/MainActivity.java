@@ -56,7 +56,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void download(View view) {
-        new Thread(new Runnable() {
+        //GtfsRealtime.TripUpdate[] test = LTCLiveFeed.Instance().getTripUpdates(3963);
+        //GtfsRealtime.VehiclePosition[] test2 = LTCLiveFeed.Instance().getVehiclePositions(3963);
+        GtfsRealtime.Alert[] test3 = LTCLiveFeed.Instance().getAlerts();
+        Toast myToast = Toast.makeText(this, "Well it didn't crash so that's a start!", Toast.LENGTH_LONG);
+        myToast.show();
+        /*new Thread(new Runnable() {
             @Override
             public void run() {
                 try
@@ -67,13 +72,15 @@ public class MainActivity extends AppCompatActivity {
                     GtfsRealtime.FeedMessage feed = GtfsRealtime.FeedMessage.parseFrom(url.openStream());
                     GtfsRealtime.FeedMessage feed2 = GtfsRealtime.FeedMessage.parseFrom(url2.openStream());
                     GtfsRealtime.FeedMessage feed3 = GtfsRealtime.FeedMessage.parseFrom(url3.openStream());
+                    GtfsRealtime.FeedEntity test;
+
                 }
                 catch (Exception ex)
                 {
 
                 }
             }
-        }).start();
+        }).start();*/
     }
 
     public void parseCSV(View view) {
