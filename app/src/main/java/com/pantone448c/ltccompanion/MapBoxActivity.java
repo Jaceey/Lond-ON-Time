@@ -11,13 +11,10 @@ import android.graphics.Color;
 import android.graphics.PointF;
 import android.location.Location;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.FrameLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.mapbox.android.core.location.LocationEngine;
@@ -29,6 +26,7 @@ import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.android.core.permissions.PermissionsManager;
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.FeatureCollection;
+import com.mapbox.geojson.Geometry;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
@@ -43,6 +41,7 @@ import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.mapboxsdk.plugins.building.BuildingPlugin;
+import com.mapbox.mapboxsdk.plugins.markerview.MarkerView;
 import com.mapbox.mapboxsdk.plugins.markerview.MarkerViewManager;
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
@@ -65,6 +64,11 @@ import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconOffset;
 
 public class MapBoxActivity extends AppCompatActivity implements OnMapReadyCallback, MapboxMap.OnMapClickListener, PermissionsListener {
 
+    /** The following is used by the commented code at the bottom of the file
+     * To populate the featureCollection with provided GeoJSON data for generating markers
+
+    private GeoJsonSource source;
+
     private static final String GEOJSON_SOURCE_ID = "GEOJSON_SOURCE_ID";
     private static final String MARKER_IMAGE_ID = "MARKER_IMAGE_ID";
     private static final String MARKER_LAYER_ID = "MARKER_LAYER_ID";
@@ -72,10 +76,16 @@ public class MapBoxActivity extends AppCompatActivity implements OnMapReadyCallb
     private static final String PROPERTY_SELECTED = "selected";
     private static final String PROPERTY_NAME = "stop_name";
 
+     */
+
     private MapView mapView;
     private MapboxMap mapboxMap;
-    private GeoJsonSource source;
-    private FeatureCollection featureCollection;
+
+    //Displaying markers?
+    private FeatureCollection featureCollection;    /** A GeoJSON collection, used to store locations for markers in Mapbox */
+    //private static final String SOURCE_ID = "SOURCE_ID";
+    //private static final String ICON_ID = "ICON_ID";
+    //private static final String LAYER_ID = "LAYER_ID";
 
     //Mapbox Permission Manager
     private PermissionsManager permissionsManager;
@@ -113,6 +123,24 @@ public class MapBoxActivity extends AppCompatActivity implements OnMapReadyCallb
 
     @Override
     public void onMapReady(@NonNull final MapboxMap mapboxMap){
+        //TODO: Populate featureCollection with test markers
+        /** Doesn't work ATM, featureCollection doesn't get read in before it tries to generate the markers
+         * resulting in app crashing.
+         *
+         * String resultingJson = "";
+        try{
+            //Load GeoJSON file from local assets
+            InputStream is = this.getAssets().open("london_stops.geojson");
+            int size = is.available();
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            is.close();
+            resultingJson =  new String(buffer, Charset.forName("UTF-8"));
+        }catch(Exception ex){
+            throw new RuntimeException(ex);
+        }
+        featureCollection.fromJson(resultingJson);*/
+
         //TODO: Initialize Map
         this.mapboxMap = mapboxMap;
 
@@ -128,9 +156,11 @@ public class MapBoxActivity extends AppCompatActivity implements OnMapReadyCallb
             buildingPlugin.setVisibility(true);
 
             //Configure camera position
+            //TODO: Home in target on device location - currently does not grab device location in time
             mapboxMap.animateCamera(
                     CameraUpdateFactory.newCameraPosition(
                         new CameraPosition.Builder()
+                            /** .target(callback.lastDeviceLocation) --> Get the device location from the LocationEngine Callback */
                             .target(LONDON_COORDS)      //Camera location on launch
                             .zoom(12)                   //Camera zoom on launch (Building extrusions show <= 15)
                             .tilt(30)                   //Camera angle on launch (0-60)
@@ -142,7 +172,20 @@ public class MapBoxActivity extends AppCompatActivity implements OnMapReadyCallb
             //Populate the FeatureCollection with the GeoJson
             //new LoadGeoJsonDataTask(MapBoxActivity.this).execute();
         });
-        markerViewManager = new MarkerViewManager(mapView, mapboxMap);
+
+        //TODO: Load the markers into the MarkerViewManager
+        /** Generate the MarkerViews in the Manager from the featureCollection
+         * Does not work unless featureCollection gets populated first
+         *
+         * markerViewManager = new MarkerViewManager(mapView, mapboxMap);
+        for(Feature feat : featureCollection.features()){
+            Geometry geo = feat.geometry();
+
+            LatLng coords = new LatLng();
+
+            //markerViewManager.addMarker(new MarkerView(coords, customView))
+        }*/
+
     }   /**onMapReady*/
 
     @SuppressWarnings({"MissingPermission"})
@@ -206,6 +249,7 @@ public class MapBoxActivity extends AppCompatActivity implements OnMapReadyCallb
         }
     }   /**onPermissionResult*/
 
+    /** Callback class responsible for processing device location updates */
     private static class MapBoxActivityLocationCallback implements LocationEngineCallback<LocationEngineResult> {
 
         protected LatLng lastDeviceLocation;
@@ -300,253 +344,261 @@ public class MapBoxActivity extends AppCompatActivity implements OnMapReadyCallb
 
     @Override
     public boolean onMapClick(@NonNull LatLng point){
-        return handleClickIcon(mapboxMap.getProjection().toScreenLocation(point));
+        //return handleClickIcon(mapboxMap.getProjection().toScreenLocation(point));
+        return false;
     }   /**onMapClick*/
 
-    /**Processes and displays FeatureCollection onto Mapbox */
-    public void setUpData(final FeatureCollection collection){
-        featureCollection = collection;
-        if(mapboxMap != null){
-            mapboxMap.getStyle(style -> {
-                setUpSource(style);
-                setUpImage(style);
-                setUpMarkerLayer(style);
-                setUpInfoWindowLayer(style);
-            });
-        }
-    }   /**setUpData*/
+/** This code relates to the commented out code at the top of the file
+ * Note that the below code is used for Marker generation, however the function has been deprecated
+ * in Mapbox 7.0 in favour of the MarkerViewManager
+ */
 
-    /** Add GeoJSON source to map */
-    private void setUpSource(@NonNull Style loadedStyle){
-        source = new GeoJsonSource(GEOJSON_SOURCE_ID, featureCollection);
-        loadedStyle.addSource(source);
-    }   /**setUpSource*/
-
-    /** Add marker image to the map as SymbolLayer icon*/
-    private void setUpImage(@NonNull Style loadedStyle){
-        loadedStyle.addImage(MARKER_IMAGE_ID, BitmapFactory.decodeResource(this.getResources(), R.drawable.custom_marker));
-    }   /**setUpImage*/
-
-    /** Updates display of data on the map after FeatureCollection modification */
-    private void refreshSource(){
-        if(source != null && featureCollection != null){
-            source.setGeoJson(featureCollection);
-        }
-    }   /**refreshSource*/
-
-    /** Set up a layer with maki icons */
-    private void setUpMarkerLayer(@NonNull Style loadedStyle){
-        loadedStyle.addLayer(new SymbolLayer(MARKER_LAYER_ID, GEOJSON_SOURCE_ID)
-                .withProperties(
-                        iconImage(MARKER_IMAGE_ID),
-                        iconAllowOverlap(true),
-                        iconOffset(new Float[] {0f, -8f})
-                ));
-    }   /**setUpMarkerLayer*/
-
-    /** Set up layer with Android SDK Callouts */
-    private void setUpInfoWindowLayer(@NonNull Style loadedStyle){
-        loadedStyle.addLayer(new SymbolLayer(CALLOUT_LAYER_ID, GEOJSON_SOURCE_ID)
-                .withProperties(
-                        iconImage("{name}"),
-                        iconAnchor(ICON_ANCHOR_BOTTOM),
-                        iconAllowOverlap(true),
-                        iconOffset(new Float[] {-2f, -28f})
-                )
-                .withFilter(eq((get(PROPERTY_SELECTED)), literal(true))));
-    }   /**setUpInfoWindowLayer*/
-
-    /** Handle click events for SymbolLayer symbols - When a SymbolLayer is clicked, that feature is moved to selected state */
-    private boolean handleClickIcon(PointF screenPoint){
-        List<Feature> features = mapboxMap.queryRenderedFeatures(screenPoint, MARKER_LAYER_ID);
-        if(!features.isEmpty()){
-            String name = features.get(0).getStringProperty(PROPERTY_NAME);
-            List<Feature> featureList = featureCollection.features();
-            if(featureList != null){
-                for(int i = 0; i < featureList.size(); ++i){
-                    if(featureList.get(i).getStringProperty(PROPERTY_NAME).equals(name)){
-                        if(featureSelectStatus(i)){
-                            setFeatureSelectState(featureList.get(i), false);
-                        }else{
-                            setSelected(i);
-                        }
-                    }
-                }
-            }
-            return true;
-        }else{
-            return false;
-        }
-    }   /**handleClickIcon*/
-
-    /** Set a feature selected state */
-    private void setSelected(int index){
-        if(featureCollection.features() != null){
-            Feature feature = featureCollection.features().get(index);
-            setFeatureSelectState(feature, true);
-            refreshSource();
-        }
-    }   /**setSelected*/
-
-    /** Selects the state of a feature */
-    private void setFeatureSelectState(@NonNull Feature feature, boolean selectedState){
-        if(feature.properties() != null){
-            feature.properties().addProperty(PROPERTY_SELECTED, selectedState);
-            refreshSource();
-        }
-    }   /**setFeatureSelectState*/
-
-    /** Checks whether a feature's selected property is true or false */
-    private boolean featureSelectStatus(int index){
-        if(featureCollection == null){
-            return false;
-        }
-        return featureCollection.features().get(index).getBooleanProperty(PROPERTY_SELECTED);
-    }
-
-    /** Invoked when bitmaps are generated from a view */
-    public void setImageGenResults(HashMap<String, Bitmap> imageMap){
-        if(mapboxMap != null){
-            mapboxMap.getStyle(style -> {
-                style.addImages(imageMap);
-            });
-        }
-    }   /**setImageGenResults*/
-
-    /** AsyncTask to load data from assets folder */
-    private static class LoadGeoJsonDataTask extends AsyncTask<Void, Void, FeatureCollection> {
-
-        private final WeakReference<MapBoxActivity> activityRef;
-
-        LoadGeoJsonDataTask(MapBoxActivity activity){
-            this.activityRef = new WeakReference<>(activity);
-        }/**LoadGeoJsonDataTask*/
-
-        @Override
-        protected FeatureCollection doInBackground(Void... params){
-            MapBoxActivity activity = activityRef.get();
-            if(activity == null){
-                return null;
-            }
-            String geoJson = loadGeoJsonFromAsset(activity, "london_stops.geojson");
-            return FeatureCollection.fromJson(geoJson);
-        }   /**doInBackground*/
-
-        @Override
-        protected void onPostExecute(FeatureCollection featureCollection){
-            super.onPostExecute(featureCollection);
-            MapBoxActivity activity = activityRef.get();
-            if(featureCollection == null || activity == null){
-                return;
-            }
-            //Add "selected" boolean property to featureCollection
-            for(Feature singleFeat : featureCollection.features()){
-                singleFeat.addBooleanProperty(PROPERTY_SELECTED, false);
-            }
-            activity.setUpData(featureCollection);
-            new GenerateViewIconTask(activity).execute(featureCollection);
-        }   /**onPostExecute*/
-
-        static String loadGeoJsonFromAsset(Context context, String filename){
-            try{
-                //Load GeoJSON file from local assets
-                InputStream is = context.getAssets().open(filename);
-                int size = is.available();
-                byte[] buffer = new byte[size];
-                is.read(buffer);
-                is.close();
-                return new String(buffer, Charset.forName("UTF-8"));
-            }catch(Exception ex){
-                throw new RuntimeException(ex);
-            }
-        }   /**loadGeoJsonFromAsset*/
-    }   /**LoadGeoJsonDataTask*/
-
-    /** AsyncTask to generate Bitmap from Views to be used as iconImage in a SymbolLayer */
-    private static class GenerateViewIconTask extends AsyncTask<FeatureCollection, Void, HashMap<String, Bitmap>>{
-        private final HashMap<String, View> viewMap = new HashMap();
-        private final WeakReference<MapBoxActivity> activityRef;
-        private final boolean refreshSource;
-
-        GenerateViewIconTask(MapBoxActivity activity, boolean refreshSource){
-            this.activityRef = new WeakReference<>(activity);
-            this.refreshSource = refreshSource;
-        }   /**GenerateViewIconTask(2)*/
-
-        GenerateViewIconTask(MapBoxActivity activity){
-            this(activity, false);
-        }   /**GenerateViewIconTask(1)*/
-
-        @SuppressWarnings("WrongThread")
-        @Override
-        protected HashMap<String, Bitmap> doInBackground(FeatureCollection... params){
-            MapBoxActivity activity = activityRef.get();
-            if(activity != null){
-                HashMap<String, Bitmap> imagesMap = new HashMap<>();
-                LayoutInflater inflater = LayoutInflater.from(activity);
-
-                FeatureCollection featureCollection = params[0];
-
-                for(Feature feature : featureCollection.features()) {
-                    /**BubbleLayout bubbleLayout = (BubbleLayout) inflater.inflate(R.layout.map_box_layout_callout, null);
-
-                     String name = feature.getStringProperty(PROPERTY_NAME);
-                     TextView titleTextView = bubbleLayout.findViewById(R.id.info_window_title);
-                     titleTextView.setText(name);
-
-                     String style = feature.getStringProperty(PROPERTY_CAPITAL);
-                     TextView descriptionTextView = bubbleLayout.findViewById(R.id.info_window_description);
-                     descriptionTextView.setText(
-                     String.format(activity.getString(R.string.capital), style));
-
-                     int measureSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
-                     bubbleLayout.measure(measureSpec, measureSpec);
-
-                     float measuredWidth = bubbleLayout.getMeasuredWidth();
-
-                     bubbleLayout.setArrowPosition(measuredWidth / 2 - 5);
-
-                     Bitmap bitmap = SymbolGenerator.generate(bubbleLayout);
-                     imagesMap.put(name, bitmap);
-                     viewMap.put(name, bubbleLayout);*/
-                }
-                return imagesMap;
-            }else{
-                return null;
-            }
-        }   /**doInBackground*/
-
-        @Override
-        protected void onPostExecute(HashMap<String, Bitmap> bitmapHashMap){
-            super.onPostExecute(bitmapHashMap);
-            MapBoxActivity activity = activityRef.get();
-            if(activity != null && bitmapHashMap != null){
-                activity.setImageGenResults(bitmapHashMap);
-                if(refreshSource){
-                    activity.refreshSource();
-                }
-            }
-            Toast.makeText(activity, R.string.tap_on_marker_instruction, Toast.LENGTH_SHORT).show();
-        }
-    }   /**GenerateViewIconTask*/
-
-    /** Utility class for Bitmap symbol generation */
-    private static class SymbolGenerator{
-        /** Generate a Bitmap from an Android SDK View */
-        static Bitmap generate(@NonNull View view){
-            int measureSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
-            view.measure(measureSpec, measureSpec);
-
-            int measuredWidth = view.getMeasuredWidth();
-            int measuredHeight = view.getMeasuredHeight();
-
-            view.layout(0,0,measuredWidth, measuredHeight);
-            Bitmap bitmap = Bitmap.createBitmap(measuredWidth, measuredHeight, Bitmap.Config.ARGB_8888);
-            bitmap.eraseColor(Color.TRANSPARENT);
-            Canvas canvas = new Canvas(bitmap);
-            view.draw(canvas);
-            return bitmap;
-        }   /**generate*/
-    }   /**SymbolGenerator*/
+//    /*Processes and displays FeatureCollection onto Mapbox */
+//    public void setUpData(final FeatureCollection collection){
+//        featureCollection = collection;
+//        if(mapboxMap != null){
+//            mapboxMap.getStyle(style -> {
+//                setUpSource(style);
+//                setUpImage(style);
+//                setUpMarkerLayer(style);
+//                setUpInfoWindowLayer(style);
+//            });
+//        }
+//    }   /*setUpData*/
+//
+//    /* Add GeoJSON source to map */
+//    private void setUpSource(@NonNull Style loadedStyle){
+//        source = new GeoJsonSource(GEOJSON_SOURCE_ID, featureCollection);
+//        loadedStyle.addSource(source);
+//    }   /*setUpSource*/
+//
+//    /* Add marker image to the map as SymbolLayer icon*/
+//    private void setUpImage(@NonNull Style loadedStyle){
+//        loadedStyle.addImage(MARKER_IMAGE_ID, BitmapFactory.decodeResource(this.getResources(), R.drawable.custom_marker));
+//    }   /*setUpImage*/
+//
+//    /* Updates display of data on the map after FeatureCollection modification */
+//    private void refreshSource(){
+//        if(source != null && featureCollection != null){
+//            source.setGeoJson(featureCollection);
+//        }
+//    }   /*refreshSource*/
+//
+//    /* Set up a layer with maki icons */
+//    private void setUpMarkerLayer(@NonNull Style loadedStyle){
+//        loadedStyle.addLayer(new SymbolLayer(MARKER_LAYER_ID, GEOJSON_SOURCE_ID)
+//                .withProperties(
+//                        iconImage(MARKER_IMAGE_ID),
+//                        iconAllowOverlap(true),
+//                        iconOffset(new Float[] {0f, -8f})
+//                ));
+//    }   /*setUpMarkerLayer*/
+//
+//    / Set up layer with Android SDK Callouts */
+//    private void setUpInfoWindowLayer(@NonNull Style loadedStyle){
+//        loadedStyle.addLayer(new SymbolLayer(CALLOUT_LAYER_ID, GEOJSON_SOURCE_ID)
+//                .withProperties(
+//                        iconImage("{name}"),
+//                        iconAnchor(ICON_ANCHOR_BOTTOM),
+//                        iconAllowOverlap(true),
+//                        iconOffset(new Float[] {-2f, -28f})
+//                )
+//                .withFilter(eq((get(PROPERTY_SELECTED)), literal(true))));
+//    }   /*setUpInfoWindowLayer*/
+//
+//    /* Handle click events for SymbolLayer symbols - When a SymbolLayer is clicked, that feature is moved to selected state */
+//    private boolean handleClickIcon(PointF screenPoint){
+//        List<Feature> features = mapboxMap.queryRenderedFeatures(screenPoint, MARKER_LAYER_ID);
+//        if(!features.isEmpty()){
+//            String name = features.get(0).getStringProperty(PROPERTY_NAME);
+//            List<Feature> featureList = featureCollection.features();
+//            if(featureList != null){
+//                for(int i = 0; i < featureList.size(); ++i){
+//                    if(featureList.get(i).getStringProperty(PROPERTY_NAME).equals(name)){
+//                        if(featureSelectStatus(i)){
+//                            setFeatureSelectState(featureList.get(i), false);
+//                        }else{
+//                            setSelected(i);
+//                        }
+//                    }
+//                }
+//            }
+//            return true;
+//        }else{
+//            return false;
+//        }
+//    }   /*handleClickIcon*/
+//
+//    /* Set a feature selected state */
+//    private void setSelected(int index){
+//        if(featureCollection.features() != null){
+//            Feature feature = featureCollection.features().get(index);
+//            setFeatureSelectState(feature, true);
+//            refreshSource();
+//        }
+//    }   /*setSelected*/
+//
+//    /* Selects the state of a feature */
+//    private void setFeatureSelectState(@NonNull Feature feature, boolean selectedState){
+//        if(feature.properties() != null){
+//            feature.properties().addProperty(PROPERTY_SELECTED, selectedState);
+//            refreshSource();
+//        }
+//    }   /*setFeatureSelectState*/
+//
+//    /* Checks whether a feature's selected property is true or false */
+//    private boolean featureSelectStatus(int index){
+//        if(featureCollection == null){
+//            return false;
+//        }
+//        return featureCollection.features().get(index).getBooleanProperty(PROPERTY_SELECTED);
+//    }
+//
+//    /* Invoked when bitmaps are generated from a view */
+//    public void setImageGenResults(HashMap<String, Bitmap> imageMap){
+//        if(mapboxMap != null){
+//            mapboxMap.getStyle(style -> {
+//                style.addImages(imageMap);
+//            });
+//        }
+//    }   /*setImageGenResults*/
+//
+//    /* AsyncTask to load data from assets folder */
+//    private static class LoadGeoJsonDataTask extends AsyncTask<Void, Void, FeatureCollection> {
+//
+//        private final WeakReference<MapBoxActivity> activityRef;
+//
+//        LoadGeoJsonDataTask(MapBoxActivity activity){
+//            this.activityRef = new WeakReference<>(activity);
+//        }/*LoadGeoJsonDataTask*/
+//
+//        @Override
+//        protected FeatureCollection doInBackground(Void... params){
+//            MapBoxActivity activity = activityRef.get();
+//            if(activity == null){
+//                return null;
+//            }
+//            String geoJson = loadGeoJsonFromAsset(activity, "london_stops.geojson");
+//            return FeatureCollection.fromJson(geoJson);
+//        }   /*doInBackground*/
+//
+//        @Override
+//        protected void onPostExecute(FeatureCollection featureCollection){
+//            super.onPostExecute(featureCollection);
+//            MapBoxActivity activity = activityRef.get();
+//            if(featureCollection == null || activity == null){
+//                return;
+//            }
+//            //Add "selected" boolean property to featureCollection
+//            for(Feature singleFeat : featureCollection.features()){
+//                singleFeat.addBooleanProperty(PROPERTY_SELECTED, false);
+//            }
+//            activity.setUpData(featureCollection);
+//            new GenerateViewIconTask(activity).execute(featureCollection);
+//        }   /*onPostExecute*/
+//
+//        static String loadGeoJsonFromAsset(Context context, String filename){
+//            try{
+//                //Load GeoJSON file from local assets
+//                InputStream is = context.getAssets().open(filename);
+//                int size = is.available();
+//                byte[] buffer = new byte[size];
+//                is.read(buffer);
+//                is.close();
+//                return new String(buffer, Charset.forName("UTF-8"));
+//            }catch(Exception ex){
+//                throw new RuntimeException(ex);
+//            }
+//        }   /*loadGeoJsonFromAsset*/
+//    }   /*LoadGeoJsonDataTask*/
+//
+//    /* AsyncTask to generate Bitmap from Views to be used as iconImage in a SymbolLayer */
+//    private static class GenerateViewIconTask extends AsyncTask<FeatureCollection, Void, HashMap<String, Bitmap>>{
+//        private final HashMap<String, View> viewMap = new HashMap();
+//        private final WeakReference<MapBoxActivity> activityRef;
+//        private final boolean refreshSource;
+//
+//        GenerateViewIconTask(MapBoxActivity activity, boolean refreshSource){
+//            this.activityRef = new WeakReference<>(activity);
+//            this.refreshSource = refreshSource;
+//        }   /*GenerateViewIconTask(2)*/
+//
+//        GenerateViewIconTask(MapBoxActivity activity){
+//            this(activity, false);
+//        }   /*GenerateViewIconTask(1)*/
+//
+//        @SuppressWarnings("WrongThread")
+//        @Override
+//        protected HashMap<String, Bitmap> doInBackground(FeatureCollection... params){
+//            MapBoxActivity activity = activityRef.get();
+//            if(activity != null){
+//                HashMap<String, Bitmap> imagesMap = new HashMap<>();
+//                LayoutInflater inflater = LayoutInflater.from(activity);
+//
+//                FeatureCollection featureCollection = params[0];
+//
+//                for(Feature feature : featureCollection.features()) {
+//                    /* This shit is deprecated in the current Mapbox version - Use MarkerViewManager */
+//
+//                    /*BubbleLayout bubbleLayout = (BubbleLayout) inflater.inflate(R.layout.map_box_layout_callout, null);
+//
+//                     String name = feature.getStringProperty(PROPERTY_NAME);
+//                     TextView titleTextView = bubbleLayout.findViewById(R.id.info_window_title);
+//                     titleTextView.setText(name);
+//
+//                     String style = feature.getStringProperty(PROPERTY_CAPITAL);
+//                     TextView descriptionTextView = bubbleLayout.findViewById(R.id.info_window_description);
+//                     descriptionTextView.setText(
+//                     String.format(activity.getString(R.string.capital), style));
+//
+//                     int measureSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+//                     bubbleLayout.measure(measureSpec, measureSpec);
+//
+//                     float measuredWidth = bubbleLayout.getMeasuredWidth();
+//
+//                     bubbleLayout.setArrowPosition(measuredWidth / 2 - 5);
+//
+//                     Bitmap bitmap = SymbolGenerator.generate(bubbleLayout);
+//                     imagesMap.put(name, bitmap);
+//                     viewMap.put(name, bubbleLayout);*/
+//                }
+//                return imagesMap;
+//            }else{
+//                return null;
+//            }
+//        }   /*doInBackground*/
+//
+//        @Override
+//        protected void onPostExecute(HashMap<String, Bitmap> bitmapHashMap){
+//            super.onPostExecute(bitmapHashMap);
+//            MapBoxActivity activity = activityRef.get();
+//            if(activity != null && bitmapHashMap != null){
+//                activity.setImageGenResults(bitmapHashMap);
+//                if(refreshSource){
+//                    activity.refreshSource();
+//                }
+//            }
+//            Toast.makeText(activity, R.string.tap_on_marker_instruction, Toast.LENGTH_SHORT).show();
+//        }
+//    }   /*GenerateViewIconTask*/
+//
+//    /* Utility class for Bitmap symbol generation */
+//    private static class SymbolGenerator{
+//        /* Generate a Bitmap from an Android SDK View */
+//        static Bitmap generate(@NonNull View view){
+//            int measureSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+//            view.measure(measureSpec, measureSpec);
+//
+//            int measuredWidth = view.getMeasuredWidth();
+//            int measuredHeight = view.getMeasuredHeight();
+//
+//            view.layout(0,0,measuredWidth, measuredHeight);
+//            Bitmap bitmap = Bitmap.createBitmap(measuredWidth, measuredHeight, Bitmap.Config.ARGB_8888);
+//            bitmap.eraseColor(Color.TRANSPARENT);
+//            Canvas canvas = new Canvas(bitmap);
+//            view.draw(canvas);
+//            return bitmap;
+//        }   /*generate*/
+//    }   /*SymbolGenerator*/
 
 }   /**MapBoxActivity*/
