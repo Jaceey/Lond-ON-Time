@@ -3,6 +3,7 @@ package com.pantone448c.ltccompanion;
 import android.util.Log;
 
 import com.mapbox.geojson.Feature;
+import com.mapbox.geojson.Point;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
@@ -219,8 +220,11 @@ public class GTFSStaticData {
             {
                 if (count > 0)
                 {
-
+                    double lat = Double.parseDouble(record.get(4));
+                    double lon = Double.parseDouble(record.get(5));
+                    features.add(Feature.fromGeometry(Point.fromLngLat(lon, lat)));
                 }
+                ++count;
             }
         }
         catch (IOException ex)
@@ -231,8 +235,8 @@ public class GTFSStaticData {
         {
             Log.e("IndexOutofRange", ex.getMessage());
         }
-        //Feature[] featuresArray = new Feature[features.size()];
-        //featuresArray = features.toArray(featuresArray);
-        return  (Feature[])features.toArray();
+        Feature[] featuresArray = new Feature[features.size()];
+        featuresArray = features.toArray(featuresArray);
+        return  featuresArray;
     }
 }

@@ -125,6 +125,7 @@ public class MapBoxActivity extends AppCompatActivity implements OnMapReadyCallb
     public void onMapReady(@NonNull final MapboxMap mapboxMap){
         //TODO: Populate featureCollection with test markers
         long startTime = System.nanoTime();
+        /*
         String resultingJson = "";
         try{
             //Load GeoJSON file from local assets
@@ -138,10 +139,12 @@ public class MapBoxActivity extends AppCompatActivity implements OnMapReadyCallb
             throw new RuntimeException(ex);
         }
 
-        featureCollection = FeatureCollection.fromJson(resultingJson);
+        featureCollection = FeatureCollection.fromJson(resultingJson); */
+        featureCollection = FeatureCollection.fromFeatures(GTFSStaticData.getStops(getResources().openRawResource(R.raw.stops)));
         long endTime = System.nanoTime();
         long duration = (endTime - startTime) / 1000000;
-        System.out.println(duration);
+        Toast myToast = Toast.makeText(this, Long.toString(duration), Toast.LENGTH_LONG);
+        myToast.show();
         //TODO: Initialize Map
         this.mapboxMap = mapboxMap;
 
