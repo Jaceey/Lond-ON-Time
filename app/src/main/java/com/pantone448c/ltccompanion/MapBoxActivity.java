@@ -124,6 +124,7 @@ public class MapBoxActivity extends AppCompatActivity implements OnMapReadyCallb
     @Override
     public void onMapReady(@NonNull final MapboxMap mapboxMap){
         //TODO: Populate featureCollection with test markers
+        long startTime = System.nanoTime();
         String resultingJson = "";
         try{
             //Load GeoJSON file from local assets
@@ -138,7 +139,9 @@ public class MapBoxActivity extends AppCompatActivity implements OnMapReadyCallb
         }
 
         featureCollection = FeatureCollection.fromJson(resultingJson);
-
+        long endTime = System.nanoTime();
+        long duration = (endTime - startTime) / 1000000;
+        System.out.println(duration);
         //TODO: Initialize Map
         this.mapboxMap = mapboxMap;
 

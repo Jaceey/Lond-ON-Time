@@ -2,6 +2,8 @@ package com.pantone448c.ltccompanion;
 
 import android.util.Log;
 
+import com.mapbox.geojson.Feature;
+
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 
@@ -83,7 +85,7 @@ public class GTFSStaticData {
             int tripCount = 0;
             for (CSVRecord record :records)
             {
-                if (count > 1)
+                if (count > 0)
                 {
                     if (Integer.parseInt(record.get(0)) == route_id)
                     {
@@ -203,5 +205,34 @@ public class GTFSStaticData {
         return tripsArray;
     }
 
+    public static final Feature[] getStops(InputStream in)
+    {
+        ArrayList<Feature> features = new ArrayList<>();
 
+        Reader read = new InputStreamReader(in);
+
+        try
+        {
+            Iterable<CSVRecord> records = CSVFormat.RFC4180.parse(read);
+            int count = 0;
+            for (CSVRecord record: records)
+            {
+                if (count > 0)
+                {
+
+                }
+            }
+        }
+        catch (IOException ex)
+        {
+            Log.e("IOException", ex.getMessage());
+        }
+        catch (IndexOutOfBoundsException ex)
+        {
+            Log.e("IndexOutofRange", ex.getMessage());
+        }
+        //Feature[] featuresArray = new Feature[features.size()];
+        //featuresArray = features.toArray(featuresArray);
+        return  (Feature[])features.toArray();
+    }
 }
