@@ -124,10 +124,7 @@ public class MapBoxActivity extends AppCompatActivity implements OnMapReadyCallb
     @Override
     public void onMapReady(@NonNull final MapboxMap mapboxMap){
         //TODO: Populate featureCollection with test markers
-        /** Doesn't work ATM, featureCollection doesn't get read in before it tries to generate the markers
-         * resulting in app crashing.
-         *
-         * String resultingJson = "";
+        String resultingJson = "";
         try{
             //Load GeoJSON file from local assets
             InputStream is = this.getAssets().open("london_stops.geojson");
@@ -139,7 +136,8 @@ public class MapBoxActivity extends AppCompatActivity implements OnMapReadyCallb
         }catch(Exception ex){
             throw new RuntimeException(ex);
         }
-        featureCollection.fromJson(resultingJson);*/
+
+        featureCollection = FeatureCollection.fromJson(resultingJson);
 
         //TODO: Initialize Map
         this.mapboxMap = mapboxMap;
@@ -174,17 +172,14 @@ public class MapBoxActivity extends AppCompatActivity implements OnMapReadyCallb
         });
 
         //TODO: Load the markers into the MarkerViewManager
-        /** Generate the MarkerViews in the Manager from the featureCollection
-         * Does not work unless featureCollection gets populated first
-         *
-         * markerViewManager = new MarkerViewManager(mapView, mapboxMap);
+
+        markerViewManager = new MarkerViewManager(mapView, mapboxMap);
         for(Feature feat : featureCollection.features()){
             Geometry geo = feat.geometry();
 
             LatLng coords = new LatLng();
-
             //markerViewManager.addMarker(new MarkerView(coords, customView))
-        }*/
+        }
 
     }   /**onMapReady*/
 
