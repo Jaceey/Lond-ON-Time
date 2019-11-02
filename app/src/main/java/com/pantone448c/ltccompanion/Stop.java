@@ -1,5 +1,7 @@
 package com.pantone448c.ltccompanion;
 
+import com.mapbox.geojson.Feature;
+
 public final class Stop {
     public final int STOP_ID;
     public final int STOP_CODE;

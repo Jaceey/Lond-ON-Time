@@ -1,5 +1,6 @@
 package com.pantone448c.ltccompanion;
 
+import android.app.Application;
 import android.util.Log;
 
 import com.mapbox.geojson.Feature;
@@ -12,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.TreeMap;
 
@@ -20,15 +22,30 @@ import java.util.TreeMap;
  */
 public class GTFSStaticData {
 
+    private static Application context;
+
+    //call in main activity onCreate
+    public static void initContext(Application appContext)
+    {
+        if (context == null)
+        {
+            context = appContext;
+        }
+        else
+        {
+            Log.d("AlreadyInitialized", "App context already initialized!");
+        }
+
+    }
+
     /**
      *
-     * @param in An input stream pointing to the routes.txt file
      * @return a TreeMap of Route objects with all the routes in routes.txt
      */
-    public static TreeMap<Integer, Route> getRoutes(InputStream in)
+    public static TreeMap<Integer, Route> getRoutes()
     {
         TreeMap<Integer, Route> routes = new TreeMap<>();
-
+        InputStream in = context.getResources().openRawResource(R.raw.routes);
         Reader read = new InputStreamReader(in);
 
         try
@@ -68,16 +85,15 @@ public class GTFSStaticData {
 
     /**
      *
-     * @param in An input stream to the trips.txt file
      * @param route_id The bus route id for the specific trip
      * @param direction The direction of the trip you're looking for
      * @param numTrips The number of trips you want to look up, 0 for all trips
      * @return an Array of Trip Objects
      */
-    public static final Trip[] getTripsByRouteDirection(InputStream in, int route_id, Direction direction, int numTrips)
+    public static final Trip[] getTrips(int route_id, int direction, int numTrips)
     {
         ArrayList<Trip> trips = new ArrayList<>();
-
+        InputStream in = context.getResources().openRawResource(R.raw.trips);
         Reader read = new InputStreamReader(in);
         try
         {
@@ -86,108 +102,42 @@ public class GTFSStaticData {
             int tripCount = 0;
             for (CSVRecord record :records)
             {
-                if (count > 0)
-                {
-                    if (Integer.parseInt(record.get(0)) == route_id)
-                    {
-                        if (numTrips > 0) //if numTrips is equal to 0 pull all the trips
-                        {
-                            if (tripCount < numTrips)
-                            {
-                                int service_id = Integer.parseInt(record.get(1));
-                                int trip_id = Integer.parseInt(record.get(2));
-                                String trip_headsign = record.get(3);
-                                Direction _direction;
-                                Wheelchair_Accessible wheelchair_accessible;
-                                Bikes_Allowed bikes_allowed;
-                                if (record.get(5) == "1")
-                                {
-                                    _direction = Direction.OTHERWAY;
-                                }
-                                else //if it's not otherway we'll just assume it's ONEWAY (it should only be a 0 or 1 but better to just default to ONEWAY
-                                {
-                                    _direction = Direction.ONEWAY;
-                                }
-
-                                if (record.get(8) == "1")
-                                {
-                                    wheelchair_accessible = Wheelchair_Accessible.WHEELCHAIRS;
-                                }
-                                else if (record.get(8) == "2")
-                                {
-                                    wheelchair_accessible = Wheelchair_Accessible.NOWHEELCHAIRS;
-                                }
-                                else
-                                {
-                                    wheelchair_accessible = Wheelchair_Accessible.NOINFO;
-                                }
-
-                                if (record.get(9) == "1")
-                                {
-                                    bikes_allowed = Bikes_Allowed.BIKES;
-                                }
-                                else if (record.get(9) == "2")
-                                {
-                                    bikes_allowed = Bikes_Allowed.NOBIKES;
-                                }
-                                else
-                                {
-                                    bikes_allowed = Bikes_Allowed.NOINFO;
-                                }
-                                trips.add(new Trip(route_id, service_id, trip_id, trip_headsign, _direction, wheelchair_accessible, bikes_allowed));
-                                ++tripCount;
-                            }
-                            else
-                            {
-                                break;
-                            }
-
-                        }
-                        else
-                        {
+                if (count > 0) {
+                    if (Integer.parseInt(record.get(0)) == route_id && Integer.parseInt(record.get(5)) == direction) {
+                        if (tripCount < numTrips) {
                             int service_id = Integer.parseInt(record.get(1));
                             int trip_id = Integer.parseInt(record.get(2));
                             String trip_headsign = record.get(3);
                             Direction _direction;
                             Wheelchair_Accessible wheelchair_accessible;
                             Bikes_Allowed bikes_allowed;
-                            if (record.get(5) == "1")
-                            {
+                            if (record.get(5) == "1") {
                                 _direction = Direction.OTHERWAY;
-                            }
-                            else //if it's not otherway we'll just assume it's ONEWAY (it should only be a 0 or 1 but better to just default to ONEWAY
+                            } else //if it's not otherway we'll just assume it's ONEWAY (it should only be a 0 or 1 but better to just default to ONEWAY
                             {
                                 _direction = Direction.ONEWAY;
                             }
 
-                            if (record.get(8) == "1")
-                            {
+                            if (record.get(8) == "1") {
                                 wheelchair_accessible = Wheelchair_Accessible.WHEELCHAIRS;
-                            }
-                            else if (record.get(8) == "2")
-                            {
+                            } else if (record.get(8) == "2") {
                                 wheelchair_accessible = Wheelchair_Accessible.NOWHEELCHAIRS;
-                            }
-                            else
-                            {
+                            } else {
                                 wheelchair_accessible = Wheelchair_Accessible.NOINFO;
                             }
 
-                            if (record.get(9) == "1")
-                            {
+                            if (record.get(9) == "1") {
                                 bikes_allowed = Bikes_Allowed.BIKES;
-                            }
-                            else if (record.get(9) == "2")
-                            {
+                            } else if (record.get(9) == "2") {
                                 bikes_allowed = Bikes_Allowed.NOBIKES;
-                            }
-                            else
-                            {
+                            } else {
                                 bikes_allowed = Bikes_Allowed.NOINFO;
                             }
                             trips.add(new Trip(route_id, service_id, trip_id, trip_headsign, _direction, wheelchair_accessible, bikes_allowed));
+                            ++tripCount;
+                        } else {
+                            break;
                         }
-
                     }
                 }
                 ++count;
@@ -206,10 +156,90 @@ public class GTFSStaticData {
         return tripsArray;
     }
 
-    public static final Feature[] getStops(InputStream in)
+    /**
+     *
+     * @param route_id The bus route id for the specific trip
+     * @param direction The direction of the trip you're looking for
+     * @return an Array of Trip Objects
+     */
+    public static final Trip[] getTrips(int route_id, int direction)
+    {
+        ArrayList<Trip> trips = new ArrayList<>();
+        InputStream in = context.getResources().openRawResource(R.raw.trips);
+        Reader read = new InputStreamReader(in);
+        try
+        {
+            Iterable<CSVRecord> records = CSVFormat.RFC4180.parse(read);
+            int count = 0;
+            for (CSVRecord record :records)
+            {
+                if (count > 0)
+                {
+                    if (Integer.parseInt(record.get(0)) == route_id && Integer.parseInt(record.get(5)) == direction)
+                    {
+                        int service_id = Integer.parseInt(record.get(1));
+                        int trip_id = Integer.parseInt(record.get(2));
+                        String trip_headsign = record.get(3);
+                        Direction _direction;
+                        Wheelchair_Accessible wheelchair_accessible;
+                        Bikes_Allowed bikes_allowed;
+                        if (record.get(5) == "1")
+                        {
+                            _direction = Direction.OTHERWAY;
+                        }
+                        else //if it's not otherway we'll just assume it's ONEWAY (it should only be a 0 or 1 but better to just default to ONEWAY
+                        {
+                            _direction = Direction.ONEWAY;
+                        }
+
+                        if (record.get(8) == "1")
+                        {
+                            wheelchair_accessible = Wheelchair_Accessible.WHEELCHAIRS;
+                        }
+                        else if (record.get(8) == "2")
+                        {
+                            wheelchair_accessible = Wheelchair_Accessible.NOWHEELCHAIRS;
+                        }
+                        else
+                        {
+                            wheelchair_accessible = Wheelchair_Accessible.NOINFO;
+                        }
+
+                        if (record.get(9) == "1")
+                        {
+                            bikes_allowed = Bikes_Allowed.BIKES;
+                        }
+                        else if (record.get(9) == "2")
+                        {
+                            bikes_allowed = Bikes_Allowed.NOBIKES;
+                        }
+                        else
+                        {
+                            bikes_allowed = Bikes_Allowed.NOINFO;
+                        }
+                        trips.add(new Trip(route_id, service_id, trip_id, trip_headsign, _direction, wheelchair_accessible, bikes_allowed));
+                    }
+                }
+                ++count;
+            }
+        }
+        catch (IOException ex)
+        {
+            Log.e("IOException", ex.getMessage());
+        }
+        catch (IndexOutOfBoundsException ex)
+        {
+            Log.e("IndexOutofRange", ex.getMessage());
+        }
+        Trip[] tripsArray = new Trip[trips.size()];
+        tripsArray = trips.toArray(tripsArray); //convert ArrayList to straight array, don't need to return an entire arraylist since this shouldn't be edited.
+        return tripsArray;
+    }
+
+    public static final Feature[] getStops()
     {
         ArrayList<Feature> features = new ArrayList<>();
-
+        InputStream in = context.getResources().openRawResource(R.raw.stops);
         Reader read = new InputStreamReader(in);
 
         try
@@ -223,6 +253,142 @@ public class GTFSStaticData {
                     double lat = Double.parseDouble(record.get(4));
                     double lon = Double.parseDouble(record.get(5));
                     features.add(Feature.fromGeometry(Point.fromLngLat(lon, lat)));
+                }
+                ++count;
+            }
+        }
+        catch (IOException ex)
+        {
+            Log.e("IOException", ex.getMessage());
+        }
+        catch (IndexOutOfBoundsException ex)
+        {
+            Log.e("IndexOutofRange", ex.getMessage());
+        }
+        Feature[] featuresArray = new Feature[features.size()];
+        featuresArray = features.toArray(featuresArray);
+        return  featuresArray;
+    }
+
+    public static final StopTime[] getStopTimes(int tripid)
+    {
+        ArrayList<StopTime> stopTimes = new ArrayList<>();
+        InputStream in = context.getResources().openRawResource(R.raw.stop_times);
+        Reader read = new InputStreamReader(in);
+        boolean found = false;
+        try
+        {
+            Iterable<CSVRecord> records = CSVFormat.RFC4180.parse(read);
+            int count = 0;
+            for (CSVRecord record: records)
+            {
+                if (count > 0)
+                {
+                    int test = Integer.parseInt(record.get(0));
+                    if (Integer.parseInt(record.get(0)) == tripid)
+                    {
+                        found = true;
+                        int trip_id = Integer.parseInt(record.get(0));
+                        String arrival_time = record.get(1);
+                        String departure_time = record.get(2);
+                        int stop_id = Integer.parseInt(record.get(3));
+                        int stop_sequence = Integer.parseInt(record.get(4));
+                        stopTimes.add(new StopTime(trip_id, arrival_time, departure_time, stop_id, stop_sequence));
+                    }
+                    if (found && Integer.parseInt(record.get(0)) != tripid) //data is already ordered so if we've found the tripid and it's no longer matching up, then we've found all the stops for that trip
+                    {
+                        break;
+                    }
+                }
+                ++count;
+            }
+        }
+        catch (IOException ex)
+        {
+            Log.e("IOException", ex.getMessage());
+        }
+        catch (IndexOutOfBoundsException ex)
+        {
+            Log.e("IndexOutofRange", ex.getMessage());
+        }
+
+        StopTime[] stopTimesArray = new StopTime[stopTimes.size()];
+        stopTimesArray = stopTimes.toArray(stopTimesArray);
+        return stopTimesArray;
+    }
+
+    public static final Stop[] getStops(int routeid, int direction)
+    {
+        ArrayList<Stop> stops = new ArrayList<>();
+        InputStream in = context.getResources().openRawResource(R.raw.stops);
+        Reader read = new InputStreamReader(in);
+
+        Trip trip = getTrips(routeid, direction, 1)[0]; //only need the first trip to find all the stops associated with it
+        StopTime[] stopTimes = getStopTimes(trip.TRIP_ID);
+        try
+        {
+            Iterable<CSVRecord> records = CSVFormat.RFC4180.parse(read);
+            int count = 0;
+            for (CSVRecord record: records)
+            {
+                if (count > 0)
+                {
+                    for (int i=0; i<stopTimes.length; ++i) //will probably sort this list to make search times faster if it's too slow
+                    {
+                        if (Integer.parseInt(record.get(0)) == stopTimes[i].STOP_ID)
+                        {
+                            int stop_id = Integer.parseInt((record.get(0)));
+                            int stop_code = Integer.parseInt((record.get(1)));
+                            String stop_name = record.get(2);
+                            float stop_lat = Float.parseFloat(record.get(4));
+                            float stop_lon = Float.parseFloat(record.get(5));
+                            int wheelchair_boarding = Integer.parseInt(record.get(11));
+                            stops.add(new Stop(stop_id, stop_code, stop_name, stop_lat, stop_lon, wheelchair_boarding));
+                        }
+                    }
+
+                }
+                ++count;
+            }
+        }
+        catch (IOException ex)
+        {
+            Log.e("IOException", ex.getMessage());
+        }
+        catch (IndexOutOfBoundsException ex)
+        {
+            Log.e("IndexOutofRange", ex.getMessage());
+        }
+        Stop[] stopsArray = new Stop[stops.size()];
+        stopsArray = stops.toArray(stopsArray);
+        return  stopsArray;
+    }
+
+    public static final Feature[] getStopsAsFeatures(int routeid, int direction)
+    {
+        ArrayList<Feature> features = new ArrayList<>();
+        InputStream in = context.getResources().openRawResource(R.raw.stops);
+        Reader read = new InputStreamReader(in);
+
+        Trip trip = getTrips(routeid, direction, 1)[0]; //only need the first trip to find all the stops associated with it
+        StopTime[] stopTimes = getStopTimes(trip.TRIP_ID);
+        try
+        {
+            Iterable<CSVRecord> records = CSVFormat.RFC4180.parse(read);
+            int count = 0;
+            for (CSVRecord record: records)
+            {
+                if (count > 0)
+                {
+                    for (int i=0; i<stopTimes.length; ++i)
+                    {
+                        if (Integer.parseInt(record.get(0)) == stopTimes[i].STOP_ID)
+                        {
+                            double lat = Double.parseDouble(record.get(4));
+                            double lon = Double.parseDouble(record.get(5));
+                            features.add(Feature.fromGeometry(Point.fromLngLat(lon, lat)));
+                        }
+                    }
                 }
                 ++count;
             }

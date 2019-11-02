@@ -140,7 +140,7 @@ public class MapBoxActivity extends AppCompatActivity implements OnMapReadyCallb
         }
 
         featureCollection = FeatureCollection.fromJson(resultingJson); */
-        featureCollection = FeatureCollection.fromFeatures(GTFSStaticData.getStops(getResources().openRawResource(R.raw.stops)));
+        featureCollection = FeatureCollection.fromFeatures(GTFSStaticData.getStops());
         long endTime = System.nanoTime();
         long duration = (endTime - startTime) / 1000000;
         Toast myToast = Toast.makeText(this, Long.toString(duration), Toast.LENGTH_LONG);
@@ -182,7 +182,6 @@ public class MapBoxActivity extends AppCompatActivity implements OnMapReadyCallb
         markerViewManager = new MarkerViewManager(mapView, mapboxMap);
         for(Feature feat : featureCollection.features()){
             Geometry geo = feat.geometry();
-
             LatLng coords = new LatLng();
             //markerViewManager.addMarker(new MarkerView(coords, customView))
         }
