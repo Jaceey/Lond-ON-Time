@@ -140,7 +140,7 @@ public class MapBoxActivity extends AppCompatActivity implements OnMapReadyCallb
         }
 
         featureCollection = FeatureCollection.fromJson(resultingJson); */
-        featureCollection = FeatureCollection.fromFeatures(GTFSStaticData.getStops());
+        featureCollection = FeatureCollection.fromFeatures(GTFSStaticData.getStopsAsFeatures(3980, 0));
         long endTime = System.nanoTime();
         long duration = (endTime - startTime) / 1000000;
         Toast myToast = Toast.makeText(this, Long.toString(duration), Toast.LENGTH_LONG);

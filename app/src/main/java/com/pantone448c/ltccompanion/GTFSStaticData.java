@@ -236,40 +236,11 @@ public class GTFSStaticData {
         return tripsArray;
     }
 
-    public static final Feature[] getStops()
-    {
-        ArrayList<Feature> features = new ArrayList<>();
-        InputStream in = context.getResources().openRawResource(R.raw.stops);
-        Reader read = new InputStreamReader(in);
-
-        try
-        {
-            Iterable<CSVRecord> records = CSVFormat.RFC4180.parse(read);
-            int count = 0;
-            for (CSVRecord record: records)
-            {
-                if (count > 0)
-                {
-                    double lat = Double.parseDouble(record.get(4));
-                    double lon = Double.parseDouble(record.get(5));
-                    features.add(Feature.fromGeometry(Point.fromLngLat(lon, lat)));
-                }
-                ++count;
-            }
-        }
-        catch (IOException ex)
-        {
-            Log.e("IOException", ex.getMessage());
-        }
-        catch (IndexOutOfBoundsException ex)
-        {
-            Log.e("IndexOutofRange", ex.getMessage());
-        }
-        Feature[] featuresArray = new Feature[features.size()];
-        featuresArray = features.toArray(featuresArray);
-        return  featuresArray;
-    }
-
+    /**
+     *
+     * @param tripid the id of the trip that we'll be looking up stops for
+     * @return list of stoptimes
+     */
     public static final StopTime[] getStopTimes(int tripid)
     {
         ArrayList<StopTime> stopTimes = new ArrayList<>();
@@ -317,14 +288,20 @@ public class GTFSStaticData {
         return stopTimesArray;
     }
 
+    /**
+     *
+     * @param routeid the route that we want to look up stops for
+     * @param direction the direction of the route
+     * @return list of stops
+     */
     public static final Stop[] getStops(int routeid, int direction)
     {
         ArrayList<Stop> stops = new ArrayList<>();
         InputStream in = context.getResources().openRawResource(R.raw.stops);
         Reader read = new InputStreamReader(in);
 
-        Trip trip = getTrips(routeid, direction, 1)[0]; //only need the first trip to find all the stops associated with it
-        StopTime[] stopTimes = getStopTimes(trip.TRIP_ID);
+        Trip trip = getTrips(routeid, direction, 1)[0]; //only need the first trip to find all the stops associated with it, need the trip info because thats what allows us to associate the routeid with stops
+        StopTime[] stopTimes = getStopTimes(trip.TRIP_ID); //need stopTimes as they allow us to associate a tripid with specific stop locations
         try
         {
             Iterable<CSVRecord> records = CSVFormat.RFC4180.parse(read);
@@ -364,14 +341,20 @@ public class GTFSStaticData {
         return  stopsArray;
     }
 
+    /**
+     *
+     * @param routeid the route that we want to look up stops for
+     * @param direction the direction of the route
+     * @return list features with the lat/lon for the stops
+     */
     public static final Feature[] getStopsAsFeatures(int routeid, int direction)
     {
         ArrayList<Feature> features = new ArrayList<>();
         InputStream in = context.getResources().openRawResource(R.raw.stops);
         Reader read = new InputStreamReader(in);
 
-        Trip trip = getTrips(routeid, direction, 1)[0]; //only need the first trip to find all the stops associated with it
-        StopTime[] stopTimes = getStopTimes(trip.TRIP_ID);
+        Trip trip = getTrips(routeid, direction, 1)[0]; //only need the first trip to find all the stops associated with it, need the trip info because thats what allows us to associate the routeid with stops
+        StopTime[] stopTimes = getStopTimes(trip.TRIP_ID); //need stopTimes as they allow us to associate a tripid with specific stop locations
         try
         {
             Iterable<CSVRecord> records = CSVFormat.RFC4180.parse(read);
