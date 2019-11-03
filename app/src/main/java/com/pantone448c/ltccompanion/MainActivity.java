@@ -24,6 +24,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        GTFSStaticData.initContext(this.getApplication());
     }
 
 
@@ -58,7 +59,9 @@ public class MainActivity extends AppCompatActivity {
     public void download(View view) {
         //GtfsRealtime.TripUpdate[] test = LTCLiveFeed.Instance().getTripUpdates(3963);
         //GtfsRealtime.VehiclePosition[] test2 = LTCLiveFeed.Instance().getVehiclePositions(3963);
-        GtfsRealtime.Alert[] test3 = LTCLiveFeed.Instance().getAlerts();
+        //GtfsRealtime.Alert[] test3 = LTCLiveFeed.Instance().getAlerts();
+
+        Stop[] stops = GTFSStaticData.getStops(3980, 0);
         Toast myToast = Toast.makeText(this, "Well it didn't crash so that's a start!", Toast.LENGTH_LONG);
         myToast.show();
         /*new Thread(new Runnable() {

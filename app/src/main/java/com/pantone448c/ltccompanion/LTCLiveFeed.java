@@ -141,7 +141,11 @@ public class LTCLiveFeed {
             {
                 if (entity.hasTripUpdate())
                 {
-                    tripUpdateList.add(entity.getTripUpdate());
+                    if (Integer.parseInt(entity.getTripUpdate().getTrip().getRouteId()) == routeid)
+                    {
+                        tripUpdateList.add(entity.getTripUpdate());
+                    }
+
                 }
             }
             TripUpdate[] tripUpdateArray = new TripUpdate[tripUpdateList.size()];
