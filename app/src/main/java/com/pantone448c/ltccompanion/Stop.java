@@ -1,12 +1,21 @@
 package com.pantone448c.ltccompanion;
 
-import com.mapbox.geojson.Feature;
+import androidx.annotation.NonNull;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
 
+@Entity(tableName = "freq_stops")
 public final class Stop {
+    @PrimaryKey
+    @NonNull
     public final int STOP_ID;
+    @NonNull
     public final int STOP_CODE;
+    @NonNull
     public final String STOP_NAME;
+    @NonNull
     public final float STOP_LAT;
+    @NonNull
     public final float STOP_LON;
     public final int WHEELCHAIR_BOARDING;
 
