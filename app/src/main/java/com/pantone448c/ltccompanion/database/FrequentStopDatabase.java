@@ -14,7 +14,7 @@ public abstract class FrequentStopDatabase extends RoomDatabase {
 
     private static volatile FrequentStopDatabase INSTANCE;
 
-    static FrequentStopDatabase getDatabase(final Context context) {
+    public static FrequentStopDatabase getDatabase(final Context context) {
         if (INSTANCE == null) {
             synchronized (FrequentStopDatabase.class) {
                 if (INSTANCE == null) {
