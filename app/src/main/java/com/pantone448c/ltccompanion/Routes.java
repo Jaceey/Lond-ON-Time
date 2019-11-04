@@ -2,6 +2,7 @@ package com.pantone448c.ltccompanion;
 
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.TreeMap;
 
 /**
@@ -9,32 +10,18 @@ import java.util.TreeMap;
  */
 public final class Routes {
 
-    /**
-     *
-     * @param routes the actual TreeMap of routes, accessed by routeid
-     */
-    public static void LoadRoutes(final TreeMap<Integer, Route> routes)
+    public static ArrayList<Route> getRoutes()
     {
-        if (_routes == null)
+        if (_instance == null)
         {
-            _routes = new Routes(routes);
+            _instance = new Routes();
+
         }
-        else
-        {
-            Log.i("AlreadyLoaded", "The static routes variable has already been initialized");
-        }
+
+        return _instance.routes;
     }
 
-    public static Routes getRoutes()
-    {
-        return _routes;
-    }
-
-    private Routes(final TreeMap<Integer, Route> routes)
-    {
-        this.routes = routes;
-    }
-    public final TreeMap<Integer, Route> routes;
-
-    private static Routes _routes;
+    private Routes() {this.routes = GTFSStaticData.getRoutes();}
+    public final ArrayList<Route> routes;
+    private static Routes _instance;
 }
