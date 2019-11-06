@@ -57,6 +57,6 @@ public class RouteListAdapter extends RecyclerView.Adapter<RouteListAdapter.View
 
     @Override
     public int getItemCount() {
-        return GTFSStaticData.getRoutes().size();
+        return Routes.getRoutes().size();
     }
 }
