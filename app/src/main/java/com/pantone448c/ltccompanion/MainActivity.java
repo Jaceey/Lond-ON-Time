@@ -94,4 +94,9 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, MapBoxActivity.class);
         startActivity(intent);
     }
+
+    public void onRoutesClick(View view) {
+        Intent intent = new Intent(this, RoutesActivity.class);
+        startActivity(intent);
+    }
 }

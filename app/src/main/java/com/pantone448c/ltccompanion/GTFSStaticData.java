@@ -1,6 +1,7 @@
 package com.pantone448c.ltccompanion;
 
 import android.app.Application;
+import android.graphics.Color;
 import android.util.Log;
 
 import com.mapbox.geojson.Feature;
@@ -15,7 +16,11 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.sql.Time;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.TreeMap;
+
+import static android.graphics.Color.parseColor;
 
 /**
  * Contains helper functions for parsing GTFS Static Data
@@ -40,11 +45,11 @@ public class GTFSStaticData {
 
     /**
      *
-     * @return a TreeMap of Route objects with all the routes in routes.txt
+     * @return an ArrayList of Route objects with all the routes in routes.txt
      */
-    public static TreeMap<Integer, Route> getRoutes()
+    public static ArrayList<Route> getRoutes()
     {
-        TreeMap<Integer, Route> routes = new TreeMap<>();
+        ArrayList<Route> routes = new ArrayList<>();
         InputStream in = context.getResources().openRawResource(R.raw.routes);
         Reader read = new InputStreamReader(in);
 
@@ -56,20 +61,13 @@ public class GTFSStaticData {
             {
                 if (count > 0)//skip headers
                 {
-                    int route_id = Integer.parseInt(record.get(0)); //will always have a value as it's required by GTFS standard
-                    int route_name = Integer.parseInt(record.get(2));
-                    int route_colour = 0;
-                    int route_text_colour = 0;
-                    if (!record.get(7).isEmpty())
-                    {
-                        route_colour = Integer.parseInt(record.get(7), 16);
-                    }
-                    if (!record.get(8).isEmpty())
-                    {
-                        route_text_colour = Integer.parseInt(record.get(8), 16);
-                    }
-                    Route route = new Route(route_id, route_name, route_colour, route_text_colour);
-                    routes.put(route_id, route);
+                    int route_id = Integer.parseInt(record.get(2)); //will always have a value as it's required by GTFS standard
+                    int route_gid = Integer.parseInt(record.get(0));
+                    String route_name = record.get(3);
+                    String route_color = "#" + record.get(7);
+
+                    Route route = new Route(route_id, route_gid, route_name, route_color);
+                    routes.add(route);
                 }
                 ++count;
             }
@@ -79,6 +77,11 @@ public class GTFSStaticData {
             Log.e("IOException", ex.getMessage());
         }
 
+        Collections.sort(routes, new Comparator<Route>() {
+            @Override public int compare(Route r1, Route r2) {
+                return r1.ROUTE_ID - r2.ROUTE_ID;
+            }
+        });
 
         return routes;
     }
