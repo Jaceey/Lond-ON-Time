@@ -51,8 +51,12 @@ public class RouteListAdapter extends RecyclerView.Adapter<RouteListAdapter.View
     public void onBindViewHolder(ViewHolder holder, int position){
         Route curRoute = Routes.getRoutes().get(position);
 
-        holder.imageView.setColorFilter(Color.parseColor(curRoute.ROUTE_COLOUR));
+      //  holder.imageView.setColorFilter(Color.parseColor(curRoute.ROUTE_COLOUR));
+      //  holder.imageView.setBackgroundColor(Color.parseColor(curRoute.ROUTE_COLOUR));
+        holder.itemView.setBackgroundColor(Color.parseColor(curRoute.ROUTE_COLOUR));
         holder.routeText.setText(curRoute.ROUTE_NAME);
+        holder.routeText.setTextColor(Color.WHITE);
+        holder.routeText.setShadowLayer(10.0f, 4,4, Color.BLACK);
     }
 
     @Override
