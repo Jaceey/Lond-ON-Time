@@ -99,4 +99,9 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, RoutesActivity.class);
         startActivity(intent);
     }
+
+    public void onNavigationClick(View view) {
+        Intent intent = new Intent(this, NavigationDrawerActivity.class);
+        startActivity(intent);
+    }
 }
