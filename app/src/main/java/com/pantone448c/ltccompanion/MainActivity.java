@@ -1,6 +1,9 @@
 package com.pantone448c.ltccompanion;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.Observer;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -9,52 +12,32 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.google.transit.realtime.GtfsRealtime;
+import com.pantone448c.ltccompanion.viewmodels.StopViewModel;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.net.URL;
-
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVRecord;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
+
+    private StopViewModel stopVM;
+    private List<Stop> tempstops;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         GTFSStaticData.initContext(this.getApplication());
+        Routes.LoadRoutes(GTFSStaticData.getRoutes());
+        stopVM = new ViewModelProvider(this).get(StopViewModel.class);
+        stopVM.getStops().observe( this, new Observer<List<Stop>>(){
+                    @Override
+                    public void onChanged(@Nullable final List<Stop> stops)
+                    {
+                        tempstops = stops;
+                    }
+        }
+        );
     }
 
-
-    public void exampleCSVReader()
-    {
-        try
-        {
-            InputStream in = getResources().openRawResource(R.raw.routes);
-            Reader read = new InputStreamReader(in);
-            Iterable<CSVRecord> records = CSVFormat.RFC4180.parse(read);
-            int count = 0;
-            for (CSVRecord record : records)
-            {
-                if (count > 0) //skip the first row because it will have the headers and I'm not sure how to get it to skip headers automatically
-                {
-                    record.get(0);//reads the first column and returns a string
-                    record.get(1);//reads the second column and returns a string
-                    record.get(2);//reads the third column and returns a string
-                    record.get(3);//reads the fourth column and returns a string
-                }
-                ++count;
-            }
-        }
-        catch (Exception ex)//generic exception to save time
-        {
-            Toast myToast2 = Toast.makeText(this, "uh oh... something went wrong", Toast.LENGTH_LONG);
-            myToast2.show();
-        }
-
-    }
 
     public void download(View view) {
         //GtfsRealtime.TripUpdate[] test = LTCLiveFeed.Instance().getTripUpdates(3963);
@@ -86,8 +69,16 @@ public class MainActivity extends AppCompatActivity {
         }).start();*/
     }
 
-    public void parseCSV(View view) {
-        exampleCSVReader();
+    public void addStops(View view) {
+        /*
+        Stop stop = new Stop(598, 22, "Adelaide at Central  NB - #22", 42.994567f, -81.234344f, 0);
+        Stop stop2 = new Stop(599, 35, "blah not a real stop", 53.213311f, 24.312331f, 0 );
+        Stop stop3 = new Stop(13, 2, "Shas", 53.13345f, 12.512f, 0);
+        stopVM.insertStop(stop);
+        stopVM.insertStop(stop2);
+        stopVM.insertStop(stop3);
+         */
+        System.out.println("blah");
     }
 
     public void onViewMapClick(View view) {
