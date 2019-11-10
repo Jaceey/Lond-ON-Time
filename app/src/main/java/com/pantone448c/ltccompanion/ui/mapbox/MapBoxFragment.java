@@ -1,20 +1,17 @@
-package com.pantone448c.ltccompanion;
+package com.pantone448c.ltccompanion.ui.mapbox;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.fragment.app.Fragment;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.PointF;
 import android.location.Location;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.mapbox.android.core.location.LocationEngine;
@@ -41,28 +38,24 @@ import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.mapboxsdk.plugins.building.BuildingPlugin;
-import com.mapbox.mapboxsdk.plugins.markerview.MarkerView;
 import com.mapbox.mapboxsdk.plugins.markerview.MarkerViewManager;
-import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
-import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
+import com.pantone448c.ltccompanion.GTFSStaticData;
+import com.pantone448c.ltccompanion.R;
 
 
-import java.io.InputStream;
 import java.lang.ref.WeakReference;
-import java.nio.charset.Charset;
-import java.util.HashMap;
 import java.util.List;
 
+import static android.os.Looper.getMainLooper;
 import static com.mapbox.mapboxsdk.style.expressions.Expression.eq;
 import static com.mapbox.mapboxsdk.style.expressions.Expression.get;
 import static com.mapbox.mapboxsdk.style.expressions.Expression.literal;
-import static com.mapbox.mapboxsdk.style.layers.Property.ICON_ANCHOR_BOTTOM;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconAllowOverlap;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconAnchor;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconImage;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconOffset;
 
-public class MapBoxActivity extends AppCompatActivity implements OnMapReadyCallback, MapboxMap.OnMapClickListener, PermissionsListener {
+public class MapBoxFragment extends Fragment implements OnMapReadyCallback, MapboxMap.OnMapClickListener, PermissionsListener {
 
     /** The following is used by the commented code at the bottom of the file
      * To populate the featureCollection with provided GeoJSON data for generating markers
@@ -80,6 +73,8 @@ public class MapBoxActivity extends AppCompatActivity implements OnMapReadyCallb
 
     private MapView mapView;
     private MapboxMap mapboxMap;
+    private Context context;
+    private View mapBoxFragmentView;
 
     //Displaying markers?
     private FeatureCollection featureCollection;    /** A GeoJSON collection, used to store locations for markers in Mapbox */
@@ -109,17 +104,43 @@ public class MapBoxActivity extends AppCompatActivity implements OnMapReadyCallb
     private BuildingPlugin buildingPlugin;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        /**Mapbox access token configured here*/
-        Mapbox.getInstance(this, getResources().getString(R.string.mapbox_key));
-        setContentView(R.layout.activity_map_box);
+    public void onAttach(Context context)
+    {
+        super.onAttach(context);
+        this.context = context;
+    }
 
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }   /**onCreate*/
+
+
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             ViewGroup container, Bundle savedInstanceState) {
+        mapBoxFragmentView = inflater.inflate(R.layout.fragment_map_box, container, false);
+        return mapBoxFragmentView;
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState)
+    {
+        super.onActivityCreated(savedInstanceState);
+        //setContentView(R.layout.fragment_map_box);
+
+        /**Mapbox access token configured here*/
+        Mapbox.getInstance(context, getResources().getString(R.string.mapbox_key));
+
+        //AttributeSet attributeSet;
         //Initialize Mapbox
-        mapView = findViewById(R.id.mapView);
+        mapView = new MapView(context);
+        ConstraintLayout parent = mapBoxFragmentView.findViewById(R.id.mapFragmentParent);
+        parent.addView(mapView);
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
-    }   /**onCreate*/
+
+    }
 
     @Override
     public void onMapReady(@NonNull final MapboxMap mapboxMap){
@@ -143,7 +164,7 @@ public class MapBoxActivity extends AppCompatActivity implements OnMapReadyCallb
         featureCollection = FeatureCollection.fromFeatures(GTFSStaticData.getStopsAsFeatures(3980, 0));
         long endTime = System.nanoTime();
         long duration = (endTime - startTime) / 1000000;
-        Toast myToast = Toast.makeText(this, Long.toString(duration), Toast.LENGTH_LONG);
+        Toast myToast = Toast.makeText(context, Long.toString(duration), Toast.LENGTH_LONG);
         myToast.show();
         //TODO: Initialize Map
         this.mapboxMap = mapboxMap;
@@ -171,10 +192,10 @@ public class MapBoxActivity extends AppCompatActivity implements OnMapReadyCallb
                             .build()
                     ));
 
-            //mapboxMap.addOnMapClickListener(MapBoxActivity.this);
+            //mapboxMap.addOnMapClickListener(MapBoxFragment.this);
 
             //Populate the FeatureCollection with the GeoJson
-            //new LoadGeoJsonDataTask(MapBoxActivity.this).execute();
+            //new LoadGeoJsonDataTask(MapBoxFragment.this).execute();
         });
 
         //TODO: Load the markers into the MarkerViewManager
@@ -190,12 +211,12 @@ public class MapBoxActivity extends AppCompatActivity implements OnMapReadyCallb
 
     @SuppressWarnings({"MissingPermission"})
     private void enableLocationComponent(@NonNull Style loadedMapStyle){
-        if(PermissionsManager.areLocationPermissionsGranted(this)){
+        if(PermissionsManager.areLocationPermissionsGranted(context)){
             //Acquire instance of component
             LocationComponent locationComponent = mapboxMap.getLocationComponent();
             //Configure activation options
             LocationComponentActivationOptions locationComponentActivationOptions =
-                    LocationComponentActivationOptions.builder(this, loadedMapStyle)
+                    LocationComponentActivationOptions.builder(context, loadedMapStyle)
                     .useDefaultLocationEngine(false)
                     .build();
             //Activate and enable component
@@ -207,15 +228,15 @@ public class MapBoxActivity extends AppCompatActivity implements OnMapReadyCallb
             //Initialize Location Engine
             initLocationEngine();
         }else{
-            permissionsManager = new PermissionsManager(this);
-            permissionsManager.requestLocationPermissions(this);
+            //permissionsManager = new PermissionsManager(this);
+            //permissionsManager.requestLocationPermissions(context);
         }
     }   /**enableLocationComponent*/
 
     /** Configure the LocationEngine for device location queries */
     @SuppressWarnings({"MissingPermission"})
     private void initLocationEngine(){
-        locationEngine = LocationEngineProvider.getBestLocationEngine(this);
+        locationEngine = LocationEngineProvider.getBestLocationEngine(context);
         LocationEngineRequest request = new
                 LocationEngineRequest.Builder(DEFAULT_INTERVAL_IN_MILLISECONDS)
                 .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
@@ -234,7 +255,7 @@ public class MapBoxActivity extends AppCompatActivity implements OnMapReadyCallb
 
     @Override
     public void onExplanationNeeded(List<String> permissionsToExplain) {
-        Toast.makeText(this, R.string.user_location_permission_explanation, Toast.LENGTH_LONG).show();
+        Toast.makeText(context, R.string.user_location_permission_explanation, Toast.LENGTH_LONG).show();
     }    /**onExplanationNeeded*/
 
     @Override
@@ -244,8 +265,8 @@ public class MapBoxActivity extends AppCompatActivity implements OnMapReadyCallb
                 enableLocationComponent(mapboxMap.getStyle());
             }
         }else{
-            Toast.makeText(this, R.string.user_location_permission_not_granted, Toast.LENGTH_LONG).show();
-            finish();
+            //Toast.makeText(this, R.string.user_location_permission_not_granted, Toast.LENGTH_LONG).show();
+            //finish();
         }
     }   /**onPermissionResult*/
 
@@ -253,16 +274,16 @@ public class MapBoxActivity extends AppCompatActivity implements OnMapReadyCallb
     private static class MapBoxActivityLocationCallback implements LocationEngineCallback<LocationEngineResult> {
 
         protected LatLng lastDeviceLocation;
-        private final WeakReference<MapBoxActivity> activityRef;    //Weak Reference required to prevent memory leaks
+        private final WeakReference<MapBoxFragment> activityRef;    //Weak Reference required to prevent memory leaks
 
-        MapBoxActivityLocationCallback(MapBoxActivity activity){
+        MapBoxActivityLocationCallback(MapBoxFragment activity){
             this.activityRef = new WeakReference<>(activity);
         }   /**MapBoxActivityLocationCallback*/
 
         /** When the device location changes */
         @Override
         public void onSuccess(LocationEngineResult result){
-            MapBoxActivity activity = activityRef.get();
+            MapBoxFragment activity = activityRef.get();
             if(activity != null){
                 Location location = result.getLastLocation();
                 if(location == null)
@@ -271,7 +292,7 @@ public class MapBoxActivity extends AppCompatActivity implements OnMapReadyCallb
                 //Pass result to LocationComponent
                 activity.mapboxMap.getLocationComponent().forceLocationUpdate(result.getLastLocation());
                 //Print a Toast of the Coordinates
-                Toast.makeText(activity, lastDeviceLocation.toString(), Toast.LENGTH_SHORT).show();
+                //Toast.makeText(activity, lastDeviceLocation.toString(), Toast.LENGTH_SHORT).show();
             }
         }   /**onSuccess*/
 
@@ -279,9 +300,9 @@ public class MapBoxActivity extends AppCompatActivity implements OnMapReadyCallb
         @Override
         public void onFailure(@NonNull Exception exception){
             Log.d(activityRef.get().getResources().getString(R.string.debug_tag), exception.getLocalizedMessage());
-            MapBoxActivity activity = activityRef.get();
+            MapBoxFragment activity = activityRef.get();
             if(activity != null){
-                Toast.makeText(activity, exception.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                //Toast.makeText(activity, exception.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
             }
         }
     }   /**MapBoxActivityLocationCallback*/
@@ -317,7 +338,7 @@ public class MapBoxActivity extends AppCompatActivity implements OnMapReadyCallb
     }   /**onLowMemory*/
 
     @Override
-    protected void onDestroy(){
+    public void onDestroy(){
         super.onDestroy();
         if(locationEngine != null){
             locationEngine.removeLocationUpdates(callback);
@@ -330,7 +351,7 @@ public class MapBoxActivity extends AppCompatActivity implements OnMapReadyCallb
     }   /**onDestroy*/
 
     @Override
-    protected void onSaveInstanceState(Bundle outState){
+    public void onSaveInstanceState(Bundle outState){
         super.onSaveInstanceState(outState);
         mapView.onSaveInstanceState(outState);
     }   /**onSaveInstanceState*/
@@ -466,15 +487,15 @@ public class MapBoxActivity extends AppCompatActivity implements OnMapReadyCallb
 //    /* AsyncTask to load data from assets folder */
 //    private static class LoadGeoJsonDataTask extends AsyncTask<Void, Void, FeatureCollection> {
 //
-//        private final WeakReference<MapBoxActivity> activityRef;
+//        private final WeakReference<MapBoxFragment> activityRef;
 //
-//        LoadGeoJsonDataTask(MapBoxActivity activity){
+//        LoadGeoJsonDataTask(MapBoxFragment activity){
 //            this.activityRef = new WeakReference<>(activity);
 //        }/*LoadGeoJsonDataTask*/
 //
 //        @Override
 //        protected FeatureCollection doInBackground(Void... params){
-//            MapBoxActivity activity = activityRef.get();
+//            MapBoxFragment activity = activityRef.get();
 //            if(activity == null){
 //                return null;
 //            }
@@ -485,7 +506,7 @@ public class MapBoxActivity extends AppCompatActivity implements OnMapReadyCallb
 //        @Override
 //        protected void onPostExecute(FeatureCollection featureCollection){
 //            super.onPostExecute(featureCollection);
-//            MapBoxActivity activity = activityRef.get();
+//            MapBoxFragment activity = activityRef.get();
 //            if(featureCollection == null || activity == null){
 //                return;
 //            }
@@ -515,22 +536,22 @@ public class MapBoxActivity extends AppCompatActivity implements OnMapReadyCallb
 //    /* AsyncTask to generate Bitmap from Views to be used as iconImage in a SymbolLayer */
 //    private static class GenerateViewIconTask extends AsyncTask<FeatureCollection, Void, HashMap<String, Bitmap>>{
 //        private final HashMap<String, View> viewMap = new HashMap();
-//        private final WeakReference<MapBoxActivity> activityRef;
+//        private final WeakReference<MapBoxFragment> activityRef;
 //        private final boolean refreshSource;
 //
-//        GenerateViewIconTask(MapBoxActivity activity, boolean refreshSource){
+//        GenerateViewIconTask(MapBoxFragment activity, boolean refreshSource){
 //            this.activityRef = new WeakReference<>(activity);
 //            this.refreshSource = refreshSource;
 //        }   /*GenerateViewIconTask(2)*/
 //
-//        GenerateViewIconTask(MapBoxActivity activity){
+//        GenerateViewIconTask(MapBoxFragment activity){
 //            this(activity, false);
 //        }   /*GenerateViewIconTask(1)*/
 //
 //        @SuppressWarnings("WrongThread")
 //        @Override
 //        protected HashMap<String, Bitmap> doInBackground(FeatureCollection... params){
-//            MapBoxActivity activity = activityRef.get();
+//            MapBoxFragment activity = activityRef.get();
 //            if(activity != null){
 //                HashMap<String, Bitmap> imagesMap = new HashMap<>();
 //                LayoutInflater inflater = LayoutInflater.from(activity);
@@ -571,7 +592,7 @@ public class MapBoxActivity extends AppCompatActivity implements OnMapReadyCallb
 //        @Override
 //        protected void onPostExecute(HashMap<String, Bitmap> bitmapHashMap){
 //            super.onPostExecute(bitmapHashMap);
-//            MapBoxActivity activity = activityRef.get();
+//            MapBoxFragment activity = activityRef.get();
 //            if(activity != null && bitmapHashMap != null){
 //                activity.setImageGenResults(bitmapHashMap);
 //                if(refreshSource){
@@ -601,4 +622,4 @@ public class MapBoxActivity extends AppCompatActivity implements OnMapReadyCallb
 //        }   /*generate*/
 //    }   /*SymbolGenerator*/
 
-}   /**MapBoxActivity*/
+}   /**MapBoxFragment*/

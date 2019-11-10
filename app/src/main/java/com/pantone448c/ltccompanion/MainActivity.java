@@ -3,17 +3,16 @@ package com.pantone448c.ltccompanion;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
 
-import com.google.transit.realtime.GtfsRealtime;
+import com.pantone448c.ltccompanion.ui.mapbox.MapBoxFragment;
+import com.pantone448c.ltccompanion.ui.routes.RoutesFragment;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.net.URL;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
@@ -91,12 +90,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onViewMapClick(View view) {
-        Intent intent = new Intent(this, MapBoxActivity.class);
+        Intent intent = new Intent(this, MapBoxFragment.class);
         startActivity(intent);
     }
 
     public void onRoutesClick(View view) {
-        Intent intent = new Intent(this, RoutesActivity.class);
+        Intent intent = new Intent(this, RoutesFragment.class);
         startActivity(intent);
     }
 

@@ -23,8 +23,8 @@
             android:name=".NavigationDrawerActivity"
             android:label="@string/title_activity_navigation_drawer"
             android:theme="@style/AppTheme.NoActionBar"></activity>
-        <activity android:name=".RoutesActivity" />
-        <activity android:name=".MapBoxActivity" />
+        <activity android:name=".ui.routes.RoutesFragment" />
+        <activity android:name=".ui.mapbox.MapBoxFragment" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").

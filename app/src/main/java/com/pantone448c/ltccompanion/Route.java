@@ -1,7 +1,5 @@
 package com.pantone448c.ltccompanion;
 
-import android.graphics.Color;
-
 public final class Route {
     public final int ROUTE_ID;
     public final int ROUTE_GID;
