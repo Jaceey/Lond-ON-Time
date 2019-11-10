@@ -6,18 +6,19 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 
 import com.pantone448c.ltccompanion.Stop;
-import com.pantone448c.ltccompanion.database.FrequentStopDatabase;
-import com.pantone448c.ltccompanion.database.StopDAO;
+import com.pantone448c.ltccompanion.database.StopRepo;
 
 import java.util.List;
 
 public class StopViewModel extends AndroidViewModel {
-    private StopDAO dao;
+    private StopRepo stopRepo;
     private LiveData<List<Stop>> stops;
+
     public StopViewModel (Application application)
     {
         super(application);
-        dao = FrequentStopDatabase.getDatabase(application).stopDAO();
+        stopRepo = new StopRepo(application);
+        stops = stopRepo.getFrequentStops();
     }
 
     public LiveData<List<Stop>> getStops()
@@ -25,8 +26,13 @@ public class StopViewModel extends AndroidViewModel {
         return stops;
     }
 
-    public void insert(Stop stop)
+    public void insertStop(Stop stop)
     {
-        dao.insertStop(stop);
+        stopRepo.insertStop(stop);
+    }
+
+    public void deleteStop(Stop stop)
+    {
+        stopRepo.deleteStop(stop);
     }
 }
