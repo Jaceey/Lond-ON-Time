@@ -229,7 +229,7 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Mapb
             initLocationEngine();
         }else{
             //permissionsManager = new PermissionsManager(this);
-            //permissionsManager.requestLocationPermissions(context);
+            //permissionsManager.requestLocationPermissions(context.);
         }
     }   /**enableLocationComponent*/
 
@@ -265,7 +265,7 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Mapb
                 enableLocationComponent(mapboxMap.getStyle());
             }
         }else{
-            //Toast.makeText(this, R.string.user_location_permission_not_granted, Toast.LENGTH_LONG).show();
+            Toast.makeText(context, R.string.user_location_permission_not_granted, Toast.LENGTH_LONG).show();
             //finish();
         }
     }   /**onPermissionResult*/
