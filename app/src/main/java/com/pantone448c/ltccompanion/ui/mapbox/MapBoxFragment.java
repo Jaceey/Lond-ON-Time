@@ -228,8 +228,8 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Mapb
             //Initialize Location Engine
             initLocationEngine();
         }else{
-            //permissionsManager = new PermissionsManager(this);
-            //permissionsManager.requestLocationPermissions(context.);
+            permissionsManager = new PermissionsManager(this);
+            permissionsManager.requestLocationPermissions(getActivity());
         }
     }   /**enableLocationComponent*/
 
@@ -292,7 +292,7 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Mapb
                 //Pass result to LocationComponent
                 activity.mapboxMap.getLocationComponent().forceLocationUpdate(result.getLastLocation());
                 //Print a Toast of the Coordinates
-                //Toast.makeText(activity, lastDeviceLocation.toString(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(activity.getContext(), lastDeviceLocation.toString(), Toast.LENGTH_SHORT).show();
             }
         }   /**onSuccess*/
 
@@ -302,7 +302,7 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Mapb
             Log.d(activityRef.get().getResources().getString(R.string.debug_tag), exception.getLocalizedMessage());
             MapBoxFragment activity = activityRef.get();
             if(activity != null){
-                //Toast.makeText(activity, exception.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(activity.getContext(), exception.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
             }
         }
     }   /**MapBoxActivityLocationCallback*/
