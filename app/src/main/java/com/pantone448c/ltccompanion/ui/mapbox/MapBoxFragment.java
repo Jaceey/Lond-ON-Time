@@ -93,8 +93,8 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Mapb
 
     //MapView Boundaries Declarations
     private static final LatLng LONDON_COORDS = new LatLng(42.983612, -81.249725);
-    private static final LatLng BOUND_CORNER_NW = new LatLng(LONDON_COORDS.getLatitude() - 0.5,LONDON_COORDS.getLongitude() - 0.5);
-    private static final LatLng BOUND_CORNER_SE = new LatLng(LONDON_COORDS.getLatitude() + 0.5,LONDON_COORDS.getLongitude() + 0.5);
+    private static final LatLng BOUND_CORNER_NW = new LatLng(LONDON_COORDS.getLatitude() - 0.25,LONDON_COORDS.getLongitude() - 0.25);
+    private static final LatLng BOUND_CORNER_SE = new LatLng(LONDON_COORDS.getLatitude() + 0.25,LONDON_COORDS.getLongitude() + 0.25);
     private static final LatLngBounds RESTRICTED_BOUNDS_AREA = new LatLngBounds.Builder()
             .include(BOUND_CORNER_NW)
             .include(BOUND_CORNER_SE)
@@ -172,6 +172,7 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Mapb
         mapboxMap.setStyle(Style.MAPBOX_STREETS, style -> {
             //Set the map bounds
             mapboxMap.setLatLngBoundsForCameraTarget(RESTRICTED_BOUNDS_AREA);
+            mapboxMap.setMinZoomPreference(10);
             //Launch Mapbox's location engine
             enableLocationComponent(style);
 
