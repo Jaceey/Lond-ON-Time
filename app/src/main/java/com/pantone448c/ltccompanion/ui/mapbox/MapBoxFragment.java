@@ -167,6 +167,7 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Mapb
         long duration = (endTime - startTime) / 1000000;
         Toast myToast = Toast.makeText(context, Long.toString(duration), Toast.LENGTH_LONG);
         myToast.show();
+
         //TODO: Initialize Map
         this.mapboxMap = mapboxMap;
 
@@ -180,7 +181,7 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Mapb
 
             //Configure building extrusion plugin
             buildingPlugin = new BuildingPlugin(mapView, mapboxMap, style);
-            buildingPlugin.setMinZoomLevel(15f);
+            buildingPlugin.setMinZoomLevel(11f);
             buildingPlugin.setVisibility(true);
 
             //mapboxMap.addOnMapClickListener(MapBoxFragment.this);
@@ -191,11 +192,11 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Mapb
 
         //Configure initial camera position
         mapboxMap.setCameraPosition(
-                new CameraPosition.Builder()
-                    .target(lastDeviceLocation) //Camera location on launch
-                    .zoom(12f)                   //Camera zoom on launch (Building extrusions show <= 15)
-                    .tilt(30.0)                   //Camera angle on launch (0-60)
-                    .build()
+            new CameraPosition.Builder()
+                .target(lastDeviceLocation)     //Camera location on launch
+                .zoom(12f)                      //Camera zoom on launch (Building extrusions show <= 15)
+                .tilt(30.0)                     //Camera angle on launch (0-60)
+                .build()
         );
 
         //TODO: Load the markers into the MarkerViewManager
@@ -272,7 +273,6 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Mapb
     /** Callback class responsible for processing device location updates */
     private static class MapBoxActivityLocationCallback implements LocationEngineCallback<LocationEngineResult> {
 
-        //protected LatLng lastDeviceLocation;
         private final WeakReference<MapBoxFragment> activityRef;    //Weak Reference required to prevent memory leaks
 
         MapBoxActivityLocationCallback(MapBoxFragment activity){
