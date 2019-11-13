@@ -90,6 +90,7 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Mapb
     private long DEFAULT_INTERVAL_IN_MILLISECONDS = 1000L;
     private long DEFAULT_MAX_WAIT_TIME = DEFAULT_INTERVAL_IN_MILLISECONDS * 5;
     private MapBoxActivityLocationCallback callback = new MapBoxActivityLocationCallback(this);
+    private static LatLng lastDeviceLocation;
 
     //MapView Boundaries Declarations
     private static final LatLng LONDON_COORDS = new LatLng(42.983612, -81.249725);
@@ -181,23 +182,23 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Mapb
             buildingPlugin.setMinZoomLevel(15f);
             buildingPlugin.setVisibility(true);
 
-            //Configure camera position
-            //TODO: Home in target on device location - currently does not grab device location in time
-            mapboxMap.animateCamera(
-                    CameraUpdateFactory.newCameraPosition(
-                        new CameraPosition.Builder()
-                            /** .target(callback.lastDeviceLocation) --> Get the device location from the LocationEngine Callback */
-                            .target(LONDON_COORDS)      //Camera location on launch
-                            .zoom(12)                   //Camera zoom on launch (Building extrusions show <= 15)
-                            .tilt(30)                   //Camera angle on launch (0-60)
-                            .build()
-                    ));
-
             //mapboxMap.addOnMapClickListener(MapBoxFragment.this);
 
             //Populate the FeatureCollection with the GeoJson
             //new LoadGeoJsonDataTask(MapBoxFragment.this).execute();
         });
+
+        //Configure camera position
+        //TODO: Home in target on device location - currently does not grab device location in time
+        mapboxMap.animateCamera(
+            CameraUpdateFactory.newCameraPosition(
+                new CameraPosition.Builder()
+                    .target(lastDeviceLocation) // --> Get the device location from the LocationEngine Callback
+                    //.target(LONDON_COORDS)      //Camera location on launch
+                    .zoom(12)                   //Camera zoom on launch (Building extrusions show <= 15)
+                    .tilt(30)                   //Camera angle on launch (0-60)
+                    .build()
+        ));
 
         //TODO: Load the markers into the MarkerViewManager
 
@@ -274,7 +275,7 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Mapb
     /** Callback class responsible for processing device location updates */
     private static class MapBoxActivityLocationCallback implements LocationEngineCallback<LocationEngineResult> {
 
-        protected LatLng lastDeviceLocation;
+        //protected LatLng lastDeviceLocation;
         private final WeakReference<MapBoxFragment> activityRef;    //Weak Reference required to prevent memory leaks
 
         MapBoxActivityLocationCallback(MapBoxFragment activity){
