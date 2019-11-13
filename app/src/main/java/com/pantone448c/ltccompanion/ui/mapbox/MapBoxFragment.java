@@ -171,11 +171,12 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Mapb
         this.mapboxMap = mapboxMap;
 
         mapboxMap.setStyle(Style.MAPBOX_STREETS, style -> {
-            //Set the map bounds
-            mapboxMap.setLatLngBoundsForCameraTarget(RESTRICTED_BOUNDS_AREA);
-            mapboxMap.setMinZoomPreference(10);
             //Launch Mapbox's location engine
             enableLocationComponent(style);
+
+            //Set the map bounds
+            mapboxMap.setLatLngBoundsForCameraTarget(RESTRICTED_BOUNDS_AREA);
+            mapboxMap.setMinZoomPreference(10f);
 
             //Configure building extrusion plugin
             buildingPlugin = new BuildingPlugin(mapView, mapboxMap, style);
@@ -188,20 +189,16 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Mapb
             //new LoadGeoJsonDataTask(MapBoxFragment.this).execute();
         });
 
-        //Configure camera position
-        //TODO: Home in target on device location - currently does not grab device location in time
-        mapboxMap.animateCamera(
-            CameraUpdateFactory.newCameraPosition(
+        //Configure initial camera position
+        mapboxMap.setCameraPosition(
                 new CameraPosition.Builder()
-                    .target(lastDeviceLocation) // --> Get the device location from the LocationEngine Callback
-                    //.target(LONDON_COORDS)      //Camera location on launch
-                    .zoom(12)                   //Camera zoom on launch (Building extrusions show <= 15)
-                    .tilt(30)                   //Camera angle on launch (0-60)
+                    .target(lastDeviceLocation) //Camera location on launch
+                    .zoom(12f)                   //Camera zoom on launch (Building extrusions show <= 15)
+                    .tilt(30.0)                   //Camera angle on launch (0-60)
                     .build()
-        ));
+        );
 
         //TODO: Load the markers into the MarkerViewManager
-
         markerViewManager = new MarkerViewManager(mapView, mapboxMap);
         for(Feature feat : featureCollection.features()){
             Geometry geo = feat.geometry();
