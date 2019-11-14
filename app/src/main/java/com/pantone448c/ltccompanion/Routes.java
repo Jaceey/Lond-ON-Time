@@ -21,6 +21,18 @@ public final class Routes {
         return _instance.routes;
     }
 
+    public static Route getRoute(int routeID)
+    {
+        for (int i = 0; i<_instance.routes.size(); ++i)
+        {
+            if (_instance.routes.get(i).ROUTE_ID == routeID)
+            {
+                return _instance.routes.get(i);
+            }
+        }
+        throw new NullPointerException();
+    }
+
     private Routes() {this.routes = GTFSStaticData.getRoutes();}
     public final ArrayList<Route> routes;
     private static Routes _instance;

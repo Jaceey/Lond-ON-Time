@@ -57,6 +57,9 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-extensions:$rootProject.archLifecycleVersion"
     annotationProcessor "androidx.lifecycle:lifecycle-compiler:$rootProject.archLifecycleVersion"
 
+    //Tuple
+    implementation group: 'org.javatuples', name: 'javatuples', version: '1.2'
+
     // UI
     implementation "com.google.android.material:material:$rootProject.materialVersion"
 

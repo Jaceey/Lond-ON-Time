@@ -1,7 +1,6 @@
 package com.pantone448c.ltccompanion;
 
 import android.app.Application;
-import android.graphics.Color;
 import android.util.Log;
 
 import com.mapbox.geojson.Feature;
@@ -9,18 +8,20 @@ import com.mapbox.geojson.Point;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
+import org.javatuples.Triplet;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.sql.Time;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.TreeMap;
+import java.util.Date;
+import java.util.GregorianCalendar;
 
-import static android.graphics.Color.parseColor;
 
 /**
  * Contains helper functions for parsing GTFS Static Data
@@ -390,5 +391,129 @@ public class GTFSStaticData {
         Feature[] featuresArray = new Feature[features.size()];
         featuresArray = features.toArray(featuresArray);
         return  featuresArray;
+    }
+
+    public static final Trip getTrip(int tripID)
+    {
+        InputStream in = context.getResources().openRawResource(R.raw.stops);
+        Reader read = new InputStreamReader(in);
+
+        try
+        {
+            Iterable<CSVRecord> records = CSVFormat.RFC4180.parse(read);
+            int count = 0;
+            for (CSVRecord record: records)
+            {
+                if (count > 0)
+                {
+                    if (Integer.parseInt(record.get(2)) == tripID)
+                    {
+                        int routeID = Integer.parseInt(record.get(0));
+                        int serviceID = Integer.parseInt(record.get(1));
+                        String tripHeadsign = record.get(3);
+                        Direction direction;
+                        Wheelchair_Accessible wheelchair_accessible;
+                        Bikes_Allowed bikes_allowed;
+                        if (record.get(5) == "1")
+                        {
+                            direction = Direction.ONEWAY;
+                        }
+                        else
+                        {
+                            direction = Direction.OTHERWAY;
+                        }
+
+                        if (record.get(8) == "1")
+                        {
+                            wheelchair_accessible = Wheelchair_Accessible.WHEELCHAIRS;
+                        }
+                        else if (record.get(8) == "2")
+                        {
+                            wheelchair_accessible = Wheelchair_Accessible.NOWHEELCHAIRS;
+                        }
+                        else
+                        {
+                            wheelchair_accessible = Wheelchair_Accessible.NOINFO;
+                        }
+
+                        if (record.get(9) == "1")
+                        {
+                            bikes_allowed = Bikes_Allowed.BIKES;
+                        }
+                        else if (record.get(9) == "2")
+                        {
+                            bikes_allowed = Bikes_Allowed.NOBIKES;
+                        }
+                        else
+                        {
+                            bikes_allowed = Bikes_Allowed.NOINFO;
+                        }
+                        return new Trip(routeID, serviceID, tripID, tripHeadsign, direction, wheelchair_accessible, bikes_allowed);
+                    }
+                }
+                ++count;
+            }
+        }
+        catch (IOException ex)
+        {
+            Log.e("IOException", ex.getMessage());
+        }
+        catch (IndexOutOfBoundsException ex)
+        {
+            Log.e("IndexOutofRange", ex.getMessage());
+        }
+        throw new NullPointerException();
+    }
+
+    public static final Triplet<Route, StopTime, Trip>[] getBusesForStop(int stopID, int numTrips)
+    {
+        //GregorianCalendar.getInstance().getTime();
+        ArrayList<Triplet<Route, StopTime, Trip>> output = new ArrayList<>();
+        InputStream in = context.getResources().openRawResource(R.raw.stop_times);
+        Reader read = new InputStreamReader(in);
+        SimpleDateFormat timeFormatter = new SimpleDateFormat("HH:mm:ss");
+        try
+        {
+            Iterable<CSVRecord> records = CSVFormat.RFC4180.parse(read);
+            int count = 0;
+            int countTrips = 0;
+            if (numTrips == 0 || countTrips<numTrips)
+            {
+                for (CSVRecord record: records)
+                {
+                    if (count > 0)
+                    {
+                        if (Integer.parseInt(record.get(3)) == stopID)
+                        {
+                            Date arrivalTime = timeFormatter.parse(record.get(1));
+                            if (GregorianCalendar.getInstance().getTime().before(arrivalTime))
+                            {
+                                int tripID = Integer.parseInt(record.get(0));
+                                int stopSequence = Integer.parseInt(record.get(4));
+                                StopTime stopTime = new StopTime(tripID, record.get(1), record.get(2), stopID, stopSequence);
+                                Trip trip = getTrip(tripID);
+                                Route route = Routes.getRoute(trip.ROUTE_ID);
+                                output.add(new Triplet<>(route, stopTime, trip));
+                            }
+                        }
+                    }
+                    ++count;
+                }
+            }
+
+        }
+        catch (ParseException ex)
+        {
+            Log.e("ParseException", ex.getMessage());
+        }
+        catch (IOException ex)
+        {
+            Log.e("IOException", ex.getMessage());
+        }
+        catch (IndexOutOfBoundsException ex)
+        {
+            Log.e("IndexOutofRange", ex.getMessage());
+        }
+
     }
 }
