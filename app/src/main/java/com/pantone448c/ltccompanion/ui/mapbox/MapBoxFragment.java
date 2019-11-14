@@ -90,11 +90,12 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Mapb
     private long DEFAULT_INTERVAL_IN_MILLISECONDS = 1000L;
     private long DEFAULT_MAX_WAIT_TIME = DEFAULT_INTERVAL_IN_MILLISECONDS * 5;
     private MapBoxActivityLocationCallback callback = new MapBoxActivityLocationCallback(this);
+    private static LatLng lastDeviceLocation;
 
     //MapView Boundaries Declarations
     private static final LatLng LONDON_COORDS = new LatLng(42.983612, -81.249725);
-    private static final LatLng BOUND_CORNER_NW = new LatLng(LONDON_COORDS.getLatitude() - 0.5,LONDON_COORDS.getLongitude() - 0.5);
-    private static final LatLng BOUND_CORNER_SE = new LatLng(LONDON_COORDS.getLatitude() + 0.5,LONDON_COORDS.getLongitude() + 0.5);
+    private static final LatLng BOUND_CORNER_NW = new LatLng(LONDON_COORDS.getLatitude() - 0.25,LONDON_COORDS.getLongitude() - 0.25);
+    private static final LatLng BOUND_CORNER_SE = new LatLng(LONDON_COORDS.getLatitude() + 0.25,LONDON_COORDS.getLongitude() + 0.25);
     private static final LatLngBounds RESTRICTED_BOUNDS_AREA = new LatLngBounds.Builder()
             .include(BOUND_CORNER_NW)
             .include(BOUND_CORNER_SE)
@@ -166,31 +167,22 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Mapb
         long duration = (endTime - startTime) / 1000000;
         Toast myToast = Toast.makeText(context, Long.toString(duration), Toast.LENGTH_LONG);
         myToast.show();
+
         //TODO: Initialize Map
         this.mapboxMap = mapboxMap;
 
         mapboxMap.setStyle(Style.MAPBOX_STREETS, style -> {
-            //Set the map bounds
-            mapboxMap.setLatLngBoundsForCameraTarget(RESTRICTED_BOUNDS_AREA);
             //Launch Mapbox's location engine
             enableLocationComponent(style);
 
+            //Set the map bounds
+            mapboxMap.setLatLngBoundsForCameraTarget(RESTRICTED_BOUNDS_AREA);
+            mapboxMap.setMinZoomPreference(10f);
+
             //Configure building extrusion plugin
             buildingPlugin = new BuildingPlugin(mapView, mapboxMap, style);
-            buildingPlugin.setMinZoomLevel(15f);
+            buildingPlugin.setMinZoomLevel(11f);
             buildingPlugin.setVisibility(true);
-
-            //Configure camera position
-            //TODO: Home in target on device location - currently does not grab device location in time
-            mapboxMap.animateCamera(
-                    CameraUpdateFactory.newCameraPosition(
-                        new CameraPosition.Builder()
-                            /** .target(callback.lastDeviceLocation) --> Get the device location from the LocationEngine Callback */
-                            .target(LONDON_COORDS)      //Camera location on launch
-                            .zoom(12)                   //Camera zoom on launch (Building extrusions show <= 15)
-                            .tilt(30)                   //Camera angle on launch (0-60)
-                            .build()
-                    ));
 
             //mapboxMap.addOnMapClickListener(MapBoxFragment.this);
 
@@ -198,8 +190,16 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Mapb
             //new LoadGeoJsonDataTask(MapBoxFragment.this).execute();
         });
 
-        //TODO: Load the markers into the MarkerViewManager
+        //Configure initial camera position
+        mapboxMap.setCameraPosition(
+            new CameraPosition.Builder()
+                .target(lastDeviceLocation)     //Camera location on launch
+                .zoom(12f)                      //Camera zoom on launch (Building extrusions show <= 15)
+                .tilt(30.0)                     //Camera angle on launch (0-60)
+                .build()
+        );
 
+        //TODO: Load the markers into the MarkerViewManager
         markerViewManager = new MarkerViewManager(mapView, mapboxMap);
         for(Feature feat : featureCollection.features()){
             Geometry geo = feat.geometry();
@@ -228,8 +228,8 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Mapb
             //Initialize Location Engine
             initLocationEngine();
         }else{
-            //permissionsManager = new PermissionsManager(this);
-            //permissionsManager.requestLocationPermissions(context.);
+            permissionsManager = new PermissionsManager(this);
+            permissionsManager.requestLocationPermissions(getActivity());
         }
     }   /**enableLocationComponent*/
 
@@ -273,7 +273,6 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Mapb
     /** Callback class responsible for processing device location updates */
     private static class MapBoxActivityLocationCallback implements LocationEngineCallback<LocationEngineResult> {
 
-        protected LatLng lastDeviceLocation;
         private final WeakReference<MapBoxFragment> activityRef;    //Weak Reference required to prevent memory leaks
 
         MapBoxActivityLocationCallback(MapBoxFragment activity){
@@ -292,7 +291,7 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Mapb
                 //Pass result to LocationComponent
                 activity.mapboxMap.getLocationComponent().forceLocationUpdate(result.getLastLocation());
                 //Print a Toast of the Coordinates
-                //Toast.makeText(activity, lastDeviceLocation.toString(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(activity.getContext(), lastDeviceLocation.toString(), Toast.LENGTH_SHORT).show();
             }
         }   /**onSuccess*/
 
@@ -302,7 +301,7 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Mapb
             Log.d(activityRef.get().getResources().getString(R.string.debug_tag), exception.getLocalizedMessage());
             MapBoxFragment activity = activityRef.get();
             if(activity != null){
-                //Toast.makeText(activity, exception.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(activity.getContext(), exception.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
             }
         }
     }   /**MapBoxActivityLocationCallback*/
