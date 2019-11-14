@@ -81,8 +81,7 @@ public class NavigationDrawerActivity extends AppCompatActivity {
                 // reset the camera...
                 FragmentManager manager = getSupportFragmentManager();
                 MapBoxFragment frag = (MapBoxFragment) manager.findFragmentById(R.id.nav_map_box);
-                frag.ResetCameraPosition();
-                //MapBoxFragment mbf = (MapBoxFragment) getFragmentManager().findFragmentById(R.id.nav_map_box);
+                frag.ResetCameraPosition(true);
                 return true;
 
             default:

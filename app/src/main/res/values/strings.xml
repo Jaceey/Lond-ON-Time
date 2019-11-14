@@ -23,6 +23,8 @@
     <string name="menu_share">Share</string>
     <string name="menu_send">Send</string>
 
+    <string name="mapbox_cust_style">mapbox://styles/gensyll/ck2z4iba743mz1cp874euyhqf</string>
+
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
