@@ -5,14 +5,18 @@ import android.os.Bundle;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
+import android.view.MenuItem;
 import android.view.View;
 
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.navigation.NavigationView;
+import com.pantone448c.ltccompanion.ui.mapbox.MapBoxFragment;
 
 import androidx.drawerlayout.widget.DrawerLayout;
 
@@ -20,6 +24,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.view.Menu;
+import android.widget.Toast;
 
 public class NavigationDrawerActivity extends AppCompatActivity {
 
@@ -62,4 +67,29 @@ public class NavigationDrawerActivity extends AppCompatActivity {
         return NavigationUI.navigateUp(navController, mAppBarConfiguration)
                 || super.onSupportNavigateUp();
     }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_settings:
+                // User chose the "Settings" item, show the app settings UI...
+                Toast.makeText(this, "Bazinga", Toast.LENGTH_SHORT).show();
+                return true;
+
+            case R.id.action_resetCameraPos:
+                // User chose the "Reset camera position" action,
+                // reset the camera...
+                FragmentManager manager = getSupportFragmentManager();
+                MapBoxFragment frag = (MapBoxFragment) manager.findFragmentById(R.id.nav_map_box);
+                frag.ResetCameraPosition(true);
+                return true;
+
+            default:
+                // If we got here, the user's action was not recognized.
+                // Invoke the superclass to handle it.
+                return super.onOptionsItemSelected(item);
+
+        }
+    }
+
 }
