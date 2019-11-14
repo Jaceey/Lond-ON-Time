@@ -8,7 +8,7 @@ import androidx.room.RoomDatabase;
 
 import com.pantone448c.ltccompanion.Stop;
 
-@Database(entities = {Stop.class}, version = 1)
+@Database(entities = {Stop.class}, version = 1, exportSchema = false)
 public abstract class FrequentStopDatabase extends RoomDatabase {
     public abstract StopDAO stopDAO();
 
