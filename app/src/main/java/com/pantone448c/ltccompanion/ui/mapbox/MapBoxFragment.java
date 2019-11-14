@@ -72,7 +72,7 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Mapb
      */
 
     private MapView mapView;
-    private MapboxMap mapboxMap;
+    private static MapboxMap mapboxMap;
     private Context context;
     private View mapBoxFragmentView;
 
@@ -191,13 +191,7 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Mapb
         });
 
         //Configure initial camera position
-        mapboxMap.setCameraPosition(
-            new CameraPosition.Builder()
-                .target(lastDeviceLocation)     //Camera location on launch
-                .zoom(12f)                      //Camera zoom on launch (Building extrusions show <= 15)
-                .tilt(30.0)                     //Camera angle on launch (0-60)
-                .build()
-        );
+        ResetCameraPosition();
 
         //TODO: Load the markers into the MarkerViewManager
         markerViewManager = new MarkerViewManager(mapView, mapboxMap);
@@ -208,6 +202,16 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Mapb
         }
 
     }   /**onMapReady*/
+
+    public static void ResetCameraPosition(){
+        mapboxMap.setCameraPosition(
+                new CameraPosition.Builder()
+                        .target(lastDeviceLocation)     //Camera location on launch
+                        .zoom(12f)                      //Camera zoom on launch (Building extrusions show <= 15)
+                        .tilt(30.0)                     //Camera angle on launch (0-60)
+                        .build()
+        );
+    }
 
     @SuppressWarnings({"MissingPermission"})
     private void enableLocationComponent(@NonNull Style loadedMapStyle){
