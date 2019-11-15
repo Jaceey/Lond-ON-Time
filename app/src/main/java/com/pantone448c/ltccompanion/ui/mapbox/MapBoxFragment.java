@@ -52,6 +52,7 @@ import com.mapbox.mapboxsdk.plugins.building.BuildingPlugin;
 import com.mapbox.mapboxsdk.plugins.markerview.MarkerViewManager;
 import com.pantone448c.ltccompanion.GTFSStaticData;
 import com.pantone448c.ltccompanion.R;
+import com.pantone448c.ltccompanion.Stop;
 import com.pantone448c.ltccompanion.ui.savedstops.SavedStopsFragment;
 
 
@@ -208,8 +209,9 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Perm
                     public void onAnnotationLongClick(Symbol symbol) {
                         JsonElement jsonElement = symbol.getData();
                         String jsonResult = jsonElement.getAsJsonObject().get("stop_id").toString();
-                        Toast.makeText(getContext(), "Favouriting stop " + jsonResult, Toast.LENGTH_SHORT).show();
+
                         SavedStopsFragment.stopViewModel.insertStop(GTFSStaticData.getStop(Integer.parseInt(jsonResult)));
+                        Toast.makeText(getContext(), "Stop " + jsonResult + " favourited!", Toast.LENGTH_SHORT).show();
                     }
                 });
             }

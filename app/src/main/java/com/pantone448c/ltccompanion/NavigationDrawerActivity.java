@@ -18,6 +18,7 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.navigation.NavigationView;
 import com.pantone448c.ltccompanion.ui.mapbox.MapBoxFragment;
+import com.pantone448c.ltccompanion.ui.savedstops.SavedStopsFragment;
 import com.pantone448c.ltccompanion.viewmodels.StopViewModel;
 
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -40,7 +41,7 @@ public class NavigationDrawerActivity extends AppCompatActivity {
         setContentView(R.layout.activity_navigation_drawer);
 
         //StopViewModel
-        stopViewModel = new ViewModelProvider(this).get(StopViewModel.class);
+        SavedStopsFragment.stopViewModel = new ViewModelProvider(this).get(StopViewModel.class);
 
         //Navigation Bar Configuration
         Toolbar toolbar = findViewById(R.id.toolbar);

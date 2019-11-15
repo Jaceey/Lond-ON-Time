@@ -10,15 +10,20 @@ import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.mapbox.mapboxsdk.geometry.LatLng;
+import com.pantone448c.ltccompanion.ui.mapbox.MapBoxFragment;
+import com.pantone448c.ltccompanion.ui.savedstops.SavedStopsFragment;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class SavedStopsAdapter extends RecyclerView.Adapter<SavedStopsAdapter.ViewHolder> {
 
     private List<Stop> savedStops;
+    private LatLng selectedStopLocation = MapBoxFragment.LONDON_COORDS;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-
+        public LatLng coordinates;
         public TextView stopName;
         public TextView stopId;
         public ImageView imageView;
@@ -46,7 +51,6 @@ public class SavedStopsAdapter extends RecyclerView.Adapter<SavedStopsAdapter.Vi
         LayoutInflater inflater = LayoutInflater.from(context);
 
         View stopView = inflater.inflate(R.layout.savedstop_view, parent, false);
-
         ViewHolder viewHolder = new ViewHolder(stopView);
         return viewHolder;
     }
@@ -57,6 +61,7 @@ public class SavedStopsAdapter extends RecyclerView.Adapter<SavedStopsAdapter.Vi
 
         holder.stopId.setText(stop.STOP_ID + "");
         holder.stopName.setText(stop.STOP_NAME + "");
+        holder.coordinates = new LatLng(stop.STOP_LAT, stop.STOP_LON);
     }
 
     @Override

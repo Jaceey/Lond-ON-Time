@@ -35,4 +35,5 @@ public class StopViewModel extends AndroidViewModel {
     {
         stopRepo.deleteStop(stop);
     }
+
 }
