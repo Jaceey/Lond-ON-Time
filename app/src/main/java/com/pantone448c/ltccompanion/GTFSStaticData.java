@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -373,7 +372,11 @@ public class GTFSStaticData {
                         {
                             double lat = Double.parseDouble(record.get(4));
                             double lon = Double.parseDouble(record.get(5));
-                            features.add(Feature.fromGeometry(Point.fromLngLat(lon, lat)));
+                            Feature feature = Feature.fromGeometry(Point.fromLngLat(lon, lat));
+                            feature.addStringProperty("StopName", record.get(2));
+                            feature.addNumberProperty("StopID", Integer.parseInt(record.get(0)));
+                            feature.addNumberProperty("WheelChairBoarding", Integer.parseInt(record.get(11)));
+                            features.add(feature);
                         }
                     }
                 }
@@ -413,7 +416,15 @@ public class GTFSStaticData {
                 {
 
                     int stop_id = Integer.parseInt((record.get(0)));
-                    int stop_code = Integer.parseInt((record.get(1)));
+                    int stop_code;
+                    if (record.get(1) != "")
+                    {
+                        stop_code = Integer.parseInt((record.get(1)));
+                    }
+                    else
+                    {
+                        stop_code = 0;
+                    }
                     String stop_name = record.get(2);
                     float stop_lat = Float.parseFloat(record.get(4));
                     float stop_lon = Float.parseFloat(record.get(5));
@@ -458,7 +469,11 @@ public class GTFSStaticData {
                 {
                     double lat = Double.parseDouble(record.get(4));
                     double lon = Double.parseDouble(record.get(5));
-                    features.add(Feature.fromGeometry(Point.fromLngLat(lon, lat)));
+                    Feature feature = Feature.fromGeometry(Point.fromLngLat(lon, lat));
+                    feature.addStringProperty("StopName", record.get(2));
+                    feature.addNumberProperty("StopID", Integer.parseInt(record.get(0)));
+                    feature.addNumberProperty("WheelChairBoarding", Integer.parseInt(record.get(11)));
+                    features.add(feature);
                 }
                 ++count;
             }
@@ -550,11 +565,9 @@ public class GTFSStaticData {
 
     public static final Triplet<Route, StopTime, Trip>[] getBusesForStop(int stopID, int numTrips)
     {
-        //GregorianCalendar.getInstance().getTime();
         ArrayList<Triplet<Route, StopTime, Trip>> output = new ArrayList<>();
         InputStream in = context.getResources().openRawResource(R.raw.stop_times);
         Reader read = new InputStreamReader(in);
-        SimpleDateFormat timeFormatter = new SimpleDateFormat("HH:mm:ss");
         try
         {
             Iterable<CSVRecord> records = CSVFormat.RFC4180.parse(read);
