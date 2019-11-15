@@ -13,6 +13,7 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.navigation.NavigationView;
+import com.pantone448c.ltccompanion.ui.directions.RouteBuilder;
 
 import androidx.drawerlayout.widget.DrawerLayout;
 
@@ -29,6 +30,7 @@ public class NavigationDrawerActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         GTFSStaticData.initContext(this.getApplication());
+        RouteBuilder.InitRouteBuilder(this.getApplication());
         setContentView(R.layout.activity_navigation_drawer);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
