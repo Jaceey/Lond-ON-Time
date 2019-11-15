@@ -14,6 +14,7 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.navigation.NavigationView;
 import com.pantone448c.ltccompanion.ui.directions.RouteBuilder;
+import com.pantone448c.ltccompanion.ui.directions.TransitTrip;
 
 import androidx.drawerlayout.widget.DrawerLayout;
 
@@ -30,7 +31,8 @@ public class NavigationDrawerActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         GTFSStaticData.initContext(this.getApplication());
-        RouteBuilder.InitRouteBuilder(this.getApplication());
+        RouteBuilder.InitRouteBuilder(this);
+        TransitTrip test = RouteBuilder.buildTransitTrip("160+Cherryhill+Place+London+ON", "1001+Fanshawe+College+Blvd+London+ON");
         setContentView(R.layout.activity_navigation_drawer);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
