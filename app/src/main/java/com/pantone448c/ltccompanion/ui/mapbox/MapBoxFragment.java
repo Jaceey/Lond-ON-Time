@@ -200,7 +200,11 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Perm
                 symbolManager.addClickListener(new OnSymbolClickListener(){
                     @Override
                     public void onAnnotationClick(Symbol symbol){
-                        Toast.makeText(getContext(), symbol.getTextField(), Toast.LENGTH_SHORT).show();
+                        JsonElement jsonElement = symbol.getData();
+                        int jsonResult = Integer.parseInt(jsonElement.getAsJsonObject().get("stop_id").toString());
+                        //Toast.makeText(getContext(), symbol.getTextField(), Toast.LENGTH_SHORT).show();
+                        SavedStopsFragment.stopViewModel.insertStop(GTFSStaticData.getStop(jsonResult));
+                        Toast.makeText(getContext(), "Stop " + jsonResult + " favourited!", Toast.LENGTH_SHORT).show();
                     }
                 });
 
@@ -208,10 +212,15 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Perm
                     @Override
                     public void onAnnotationLongClick(Symbol symbol) {
                         JsonElement jsonElement = symbol.getData();
-                        String jsonResult = jsonElement.getAsJsonObject().get("stop_id").toString();
+                        int jsonResult = Integer.parseInt(jsonElement.getAsJsonObject().get("stop_id").toString());
 
-                        SavedStopsFragment.stopViewModel.insertStop(GTFSStaticData.getStop(Integer.parseInt(jsonResult)));
-                        Toast.makeText(getContext(), "Stop " + jsonResult + " favourited!", Toast.LENGTH_SHORT).show();
+                        //if(SavedStopsFragment.stopViewModel.getStopById(jsonResult).length > 0){
+                            SavedStopsFragment.stopViewModel.deleteStop(GTFSStaticData.getStop(jsonResult));
+                            Toast.makeText(getContext(), "Stop " + jsonResult + " un-favourited!", Toast.LENGTH_SHORT).show();
+                        /*}else{
+                            SavedStopsFragment.stopViewModel.insertStop(GTFSStaticData.getStop(jsonResult));
+                            Toast.makeText(getContext(), "Stop " + jsonResult + " favourited!", Toast.LENGTH_SHORT).show();
+                        }*/
                     }
                 });
             }
