@@ -64,7 +64,7 @@ import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconAnchor;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconImage;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconOffset;
 
-public class MapBoxFragment extends Fragment implements OnMapReadyCallback, MapboxMap.OnMapClickListener, PermissionsListener {
+public class MapBoxFragment extends Fragment implements OnMapReadyCallback, PermissionsListener {
 
     private MapView mapView;
     private static MapboxMap mapboxMap;
@@ -93,7 +93,7 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Mapb
     //Mapbox Symbol/Marker Generation
     private FeatureCollection featureCollection;    /* A GeoJSON collection, used to store locations for markers in Mapbox */
     private SymbolManager symbolManager;
-    List<SymbolOptions> symbolOptions;
+    private List<SymbolOptions> symbolOptions;
 
     private BuildingPlugin buildingPlugin;
 
@@ -307,7 +307,7 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Mapb
                 //Pass result to LocationComponent
                 activity.mapboxMap.getLocationComponent().forceLocationUpdate(result.getLastLocation());
                 //Print a Toast of the Coordinates
-                Toast.makeText(activity.getContext(), lastDeviceLocation.toString(), Toast.LENGTH_SHORT).show();
+                //Toast.makeText(activity.getContext(), lastDeviceLocation.toString(), Toast.LENGTH_SHORT).show();
             }
         }   /*onSuccess*/
 
@@ -321,11 +321,6 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Mapb
             }
         }
     }   /*MapBoxActivityLocationCallback*/
-
-    @Override
-    public boolean onMapClick(@NonNull LatLng point){
-        return false;
-    }   /*onMapClick*/
 
     @Override
     public void onStart(){
@@ -362,9 +357,6 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Mapb
         super.onDestroy();
         if(locationEngine != null){
             locationEngine.removeLocationUpdates(callback);
-        }
-        if(mapboxMap != null){
-            mapboxMap.removeOnMapClickListener(this);
         }
         symbolManager.onDestroy();
         mapView.onDestroy();
