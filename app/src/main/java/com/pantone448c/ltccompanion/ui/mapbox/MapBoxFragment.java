@@ -39,6 +39,8 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
+import com.mapbox.mapboxsdk.plugins.annotation.OnSymbolClickListener;
+import com.mapbox.mapboxsdk.plugins.annotation.Symbol;
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager;
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions;
 import com.mapbox.mapboxsdk.plugins.building.BuildingPlugin;
@@ -72,13 +74,6 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Mapb
     //Mapbox Permission Manager
     private PermissionsManager permissionsManager;
 
-    //Handles device location
-    private LocationEngine locationEngine;
-    private long DEFAULT_INTERVAL_IN_MILLISECONDS = 1000L;
-    private long DEFAULT_MAX_WAIT_TIME = DEFAULT_INTERVAL_IN_MILLISECONDS * 3;
-    private MapBoxActivityLocationCallback callback = new MapBoxActivityLocationCallback(this);
-    private static LatLng lastDeviceLocation;
-
     //MapView Boundaries Declarations
     private static final LatLng LONDON_COORDS = new LatLng(42.983612, -81.249725);
     private static final LatLng BOUND_CORNER_NW = new LatLng(LONDON_COORDS.getLatitude() - 0.25,LONDON_COORDS.getLongitude() - 0.25);
@@ -87,6 +82,13 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Mapb
             .include(BOUND_CORNER_NW)
             .include(BOUND_CORNER_SE)
             .build();
+
+    //Handles device location
+    private LocationEngine locationEngine;
+    private long DEFAULT_INTERVAL_IN_MILLISECONDS = 1000L;
+    private long DEFAULT_MAX_WAIT_TIME = DEFAULT_INTERVAL_IN_MILLISECONDS * 3;
+    private MapBoxActivityLocationCallback callback = new MapBoxActivityLocationCallback(this);
+    private static LatLng lastDeviceLocation = LONDON_COORDS;
 
     //Mapbox Symbol/Marker Generation
     private FeatureCollection featureCollection;    /* A GeoJSON collection, used to store locations for markers in Mapbox */
@@ -122,14 +124,12 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Mapb
 
         /*Mapbox access token configured here*/
         Mapbox.getInstance(context, getResources().getString(R.string.mapbox_key));
-
-        //AttributeSet attributeSet;
-        //Initialize Mapbox
         mapView = new MapView(context);
         ConstraintLayout parent = mapBoxFragmentView.findViewById(R.id.mapFragmentParent);
         parent.addView(mapView);
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
+
         symbolOptions = new ArrayList<>();
     }
 
@@ -179,18 +179,31 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Mapb
 
                 symbolManager = new SymbolManager(mapView, mapboxMap, style);
                 symbolManager.setIconAllowOverlap(true);
+                symbolManager.setTextAllowOverlap(true);
                 for(Feature feat : featureCollection.features()){
-                    symbolOptions.add(new SymbolOptions().withGeometry((Point)feat.geometry()).withIconImage("bus"));
+                    symbolOptions.add(
+                            new SymbolOptions()
+                                    .withGeometry((Point)feat.geometry())
+                                    .withIconImage("bus-11")
+                                    .withTextField(feat.getStringProperty("stop_name"))
+                                    .withTextOpacity(0.0f)
+                    );
                 }
                 Log.d(getString(R.string.debug_tag), symbolOptions.size() + " stops loaded");
                 symbolManager.create(symbolOptions);
-                //mapboxMap.addOnMapClickListener(MapBoxFragment.this);
 
+                symbolManager.addClickListener(new OnSymbolClickListener(){
+                    @Override
+                    public void onAnnotationClick(Symbol symbol){
+                        Toast.makeText(getContext(), symbol.getTextField(), Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
         });
 
         //Configure initial camera position
         ResetCameraPosition(false);
+
     }   /*onMapReady*/
 
     public static void ResetCameraPosition(boolean smoothPan){
@@ -216,26 +229,25 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Mapb
 
     @SuppressWarnings({"MissingPermission"})
     private void enableLocationComponent(@NonNull Style loadedMapStyle){
-        if(PermissionsManager.areLocationPermissionsGranted(context)){
-            //Acquire instance of component
-            LocationComponent locationComponent = mapboxMap.getLocationComponent();
-            //Configure activation options
-            LocationComponentActivationOptions locationComponentActivationOptions =
-                    LocationComponentActivationOptions.builder(context, loadedMapStyle)
-                    .useDefaultLocationEngine(false)
-                    .build();
-            //Activate and enable component
-            locationComponent.activateLocationComponent(locationComponentActivationOptions);
-            locationComponent.setLocationComponentEnabled(true);
-            //Configure camera and render modes
-            locationComponent.setCameraMode(CameraMode.TRACKING);
-            locationComponent.setRenderMode(RenderMode.COMPASS);
-            //Initialize Location Engine
-            initLocationEngine();
-        }else{
+        while(PermissionsManager.areLocationPermissionsGranted(context) == false){
             permissionsManager = new PermissionsManager(this);
             permissionsManager.requestLocationPermissions(getActivity());
         }
+        //Acquire instance of component
+        LocationComponent locationComponent = mapboxMap.getLocationComponent();
+        //Configure activation options
+        LocationComponentActivationOptions locationComponentActivationOptions =
+                LocationComponentActivationOptions.builder(context, loadedMapStyle)
+                        .useDefaultLocationEngine(false)
+                        .build();
+        //Activate and enable component
+        locationComponent.activateLocationComponent(locationComponentActivationOptions);
+        locationComponent.setLocationComponentEnabled(true);
+        //Configure camera and render modes
+        locationComponent.setCameraMode(CameraMode.TRACKING);
+        locationComponent.setRenderMode(RenderMode.COMPASS);
+        //Initialize Location Engine
+        initLocationEngine();
     }   /*enableLocationComponent*/
 
     /* Configure the LocationEngine for device location queries */
