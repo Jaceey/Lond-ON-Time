@@ -456,6 +456,56 @@ public class GTFSStaticData {
         return  stopsArray;
     }
 
+    /**
+     *
+     * @return list of stops
+     */
+    public static final Stop getStop(int stopID)
+    {
+        InputStream in = context.getResources().openRawResource(R.raw.stops);
+        Reader read = new InputStreamReader(in);
+
+        try
+        {
+            Iterable<CSVRecord> records = CSVFormat.RFC4180.parse(read);
+            int count = 0;
+            for (CSVRecord record: records)
+            {
+                if (count > 0)
+                {
+
+                    if (Integer.parseInt(record.get(0)) == stopID)
+                    {
+                        int stop_id = Integer.parseInt((record.get(0)));
+                        int stop_code;
+                        if (record.get(1) != "")
+                        {
+                            stop_code = Integer.parseInt((record.get(1)));
+                        }
+                        else
+                        {
+                            stop_code = 0;
+                        }
+                        String stop_name = record.get(2);
+                        float stop_lat = Float.parseFloat(record.get(4));
+                        float stop_lon = Float.parseFloat(record.get(5));
+                        int wheelchair_boarding = Integer.parseInt(record.get(11));
+                        return new Stop(stop_id, stop_code, stop_name, stop_lat, stop_lon, wheelchair_boarding);
+                    }
+                }
+                ++count;
+            }
+        }
+        catch (IOException ex)
+        {
+            Log.e("IOException", ex.getMessage());
+        }
+        catch (IndexOutOfBoundsException ex)
+        {
+            Log.e("IndexOutofRange", ex.getMessage());
+        }
+        throw new NullPointerException();
+    }
 
 
     /**

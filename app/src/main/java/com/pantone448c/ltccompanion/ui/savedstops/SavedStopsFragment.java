@@ -28,7 +28,7 @@ public class SavedStopsFragment extends Fragment {
     private SavedStopsAdapter mAdapter;
     private RecyclerView.LayoutManager layoutManager;
     private View stopsFragmentView;
-    private StopViewModel stopViewModel;
+    public static StopViewModel stopViewModel;
 
     @Override
     public void onAttach(Context context)
