@@ -39,6 +39,8 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
+import com.mapbox.mapboxsdk.plugins.annotation.OnSymbolClickListener;
+import com.mapbox.mapboxsdk.plugins.annotation.Symbol;
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager;
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions;
 import com.mapbox.mapboxsdk.plugins.building.BuildingPlugin;
@@ -177,13 +179,21 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Mapb
 
                 symbolManager = new SymbolManager(mapView, mapboxMap, style);
                 symbolManager.setIconAllowOverlap(true);
+                symbolManager.setTextAllowOverlap(true);
                 for(Feature feat : featureCollection.features()){
                     symbolOptions.add(new SymbolOptions().withGeometry((Point)feat.geometry()).withIconImage("bus"));
                 }
                 Log.d(getString(R.string.debug_tag), symbolOptions.size() + " stops loaded");
                 symbolManager.create(symbolOptions);
-                //mapboxMap.addOnMapClickListener(MapBoxFragment.this);
 
+                symbolManager.addClickListener(new OnSymbolClickListener(){
+                    @Override
+                    public void onAnnotationClick(Symbol symbol){
+                        Toast.makeText(getContext(), "Clicked Icon", Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+                //mapboxMap.addOnMapClickListener(MapBoxFragment.this);
             }
         });
 
