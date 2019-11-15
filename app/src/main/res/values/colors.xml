@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#008577</color>
+    <!--<color name="colorPrimary">#008577</color>
     <color name="colorPrimaryDark">#00574B</color>
-    <color name="colorAccent">#D81B60</color>
+    <color name="colorAccent">#D81B60</color>-->
+
+    <color name="colorPrimary">#71BF43</color>
+    <color name="colorPrimaryDark">#365A20</color>
+    <color name="colorAccent">#F3E775</color>
+    <!--<color name="pantone_logo_colour">#71BF43</color>-->
 </resources>

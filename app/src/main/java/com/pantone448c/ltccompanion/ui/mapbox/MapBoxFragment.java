@@ -72,13 +72,6 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Mapb
     //Mapbox Permission Manager
     private PermissionsManager permissionsManager;
 
-    //Handles device location
-    private LocationEngine locationEngine;
-    private long DEFAULT_INTERVAL_IN_MILLISECONDS = 1000L;
-    private long DEFAULT_MAX_WAIT_TIME = DEFAULT_INTERVAL_IN_MILLISECONDS * 3;
-    private MapBoxActivityLocationCallback callback = new MapBoxActivityLocationCallback(this);
-    private static LatLng lastDeviceLocation;
-
     //MapView Boundaries Declarations
     private static final LatLng LONDON_COORDS = new LatLng(42.983612, -81.249725);
     private static final LatLng BOUND_CORNER_NW = new LatLng(LONDON_COORDS.getLatitude() - 0.25,LONDON_COORDS.getLongitude() - 0.25);
@@ -87,6 +80,13 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Mapb
             .include(BOUND_CORNER_NW)
             .include(BOUND_CORNER_SE)
             .build();
+
+    //Handles device location
+    private LocationEngine locationEngine;
+    private long DEFAULT_INTERVAL_IN_MILLISECONDS = 1000L;
+    private long DEFAULT_MAX_WAIT_TIME = DEFAULT_INTERVAL_IN_MILLISECONDS * 3;
+    private MapBoxActivityLocationCallback callback = new MapBoxActivityLocationCallback(this);
+    private static LatLng lastDeviceLocation = LONDON_COORDS;
 
     //Mapbox Symbol/Marker Generation
     private FeatureCollection featureCollection;    /* A GeoJSON collection, used to store locations for markers in Mapbox */
@@ -122,14 +122,12 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Mapb
 
         /*Mapbox access token configured here*/
         Mapbox.getInstance(context, getResources().getString(R.string.mapbox_key));
-
-        //AttributeSet attributeSet;
-        //Initialize Mapbox
         mapView = new MapView(context);
         ConstraintLayout parent = mapBoxFragmentView.findViewById(R.id.mapFragmentParent);
         parent.addView(mapView);
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
+
         symbolOptions = new ArrayList<>();
     }
 
@@ -216,26 +214,25 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Mapb
 
     @SuppressWarnings({"MissingPermission"})
     private void enableLocationComponent(@NonNull Style loadedMapStyle){
-        if(PermissionsManager.areLocationPermissionsGranted(context)){
-            //Acquire instance of component
-            LocationComponent locationComponent = mapboxMap.getLocationComponent();
-            //Configure activation options
-            LocationComponentActivationOptions locationComponentActivationOptions =
-                    LocationComponentActivationOptions.builder(context, loadedMapStyle)
-                    .useDefaultLocationEngine(false)
-                    .build();
-            //Activate and enable component
-            locationComponent.activateLocationComponent(locationComponentActivationOptions);
-            locationComponent.setLocationComponentEnabled(true);
-            //Configure camera and render modes
-            locationComponent.setCameraMode(CameraMode.TRACKING);
-            locationComponent.setRenderMode(RenderMode.COMPASS);
-            //Initialize Location Engine
-            initLocationEngine();
-        }else{
+        while(PermissionsManager.areLocationPermissionsGranted(context) == false){
             permissionsManager = new PermissionsManager(this);
             permissionsManager.requestLocationPermissions(getActivity());
         }
+        //Acquire instance of component
+        LocationComponent locationComponent = mapboxMap.getLocationComponent();
+        //Configure activation options
+        LocationComponentActivationOptions locationComponentActivationOptions =
+                LocationComponentActivationOptions.builder(context, loadedMapStyle)
+                        .useDefaultLocationEngine(false)
+                        .build();
+        //Activate and enable component
+        locationComponent.activateLocationComponent(locationComponentActivationOptions);
+        locationComponent.setLocationComponentEnabled(true);
+        //Configure camera and render modes
+        locationComponent.setCameraMode(CameraMode.TRACKING);
+        locationComponent.setRenderMode(RenderMode.COMPASS);
+        //Initialize Location Engine
+        initLocationEngine();
     }   /*enableLocationComponent*/
 
     /* Configure the LocationEngine for device location queries */
