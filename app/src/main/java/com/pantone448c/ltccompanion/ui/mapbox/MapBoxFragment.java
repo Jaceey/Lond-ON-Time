@@ -181,7 +181,13 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Mapb
                 symbolManager.setIconAllowOverlap(true);
                 symbolManager.setTextAllowOverlap(true);
                 for(Feature feat : featureCollection.features()){
-                    symbolOptions.add(new SymbolOptions().withGeometry((Point)feat.geometry()).withIconImage("bus"));
+                    symbolOptions.add(
+                            new SymbolOptions()
+                                    .withGeometry((Point)feat.geometry())
+                                    .withIconImage("bus")
+                                    .withTextField(feat.getStringProperty("StopID") + "")
+                                    .withTextOffset(new Float[]{0.0f ,1.0f})
+                    );
                 }
                 Log.d(getString(R.string.debug_tag), symbolOptions.size() + " stops loaded");
                 symbolManager.create(symbolOptions);
@@ -189,7 +195,8 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Mapb
                 symbolManager.addClickListener(new OnSymbolClickListener(){
                     @Override
                     public void onAnnotationClick(Symbol symbol){
-                        Toast.makeText(getContext(), "Clicked Icon", Toast.LENGTH_SHORT).show();
+                        double distance = symbol.getLatLng().distanceTo(lastDeviceLocation) / 1000.0;
+                        Toast.makeText(getContext(),  "Stop " + symbol.getTextField(), Toast.LENGTH_SHORT).show();
                     }
                 });
 
