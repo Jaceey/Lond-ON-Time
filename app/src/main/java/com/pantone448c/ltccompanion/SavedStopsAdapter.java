@@ -32,10 +32,12 @@ public class SavedStopsAdapter extends RecyclerView.Adapter<SavedStopsAdapter.Vi
     }
 
     //constructor
-    public SavedStopsAdapter() {}
+    public SavedStopsAdapter() {
+    }
 
     public void setStops(List<Stop> stops){
-        this.savedStops = stops;
+        savedStops = stops;
+        notifyDataSetChanged();
     }
 
     @Override
@@ -51,11 +53,16 @@ public class SavedStopsAdapter extends RecyclerView.Adapter<SavedStopsAdapter.Vi
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position){
-        //TODO: Set text views
+        Stop stop = savedStops.get(position);
+
+        holder.stopId.setText(stop.STOP_ID);
+        holder.stopName.setText(stop.STOP_NAME);
     }
 
     @Override
     public int getItemCount() {
-        return Routes.getRoutes().size();
+        if (savedStops != null)
+            return savedStops.size();
+        else return 0;
     }
 }

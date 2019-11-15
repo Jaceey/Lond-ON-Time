@@ -25,10 +25,10 @@ import java.util.List;
 public class SavedStopsFragment extends Fragment {
     private Context context;
     private RecyclerView recyclerView;
-    private RecyclerView.Adapter mAdapter;
+    private SavedStopsAdapter mAdapter;
     private RecyclerView.LayoutManager layoutManager;
     private View stopsFragmentView;
-    private StopViewModel stopViewModel = new ViewModelProvider(getActivity()).get(StopViewModel.class);
+    private StopViewModel stopViewModel;
 
     @Override
     public void onAttach(Context context)
@@ -53,6 +53,7 @@ public class SavedStopsFragment extends Fragment {
         recyclerView.setLayoutManager(layoutManager);
 
         mAdapter = new SavedStopsAdapter();
+        stopViewModel = new ViewModelProvider(getActivity()).get(StopViewModel.class);
         stopViewModel.getStops().observe(getActivity(), new Observer<List<Stop>>() {
             @Override
             public void onChanged(@Nullable final List<Stop> stops) {
