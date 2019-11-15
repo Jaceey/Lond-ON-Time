@@ -204,7 +204,7 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Perm
                         int jsonResult = Integer.parseInt(jsonElement.getAsJsonObject().get("stop_id").toString());
                         //Toast.makeText(getContext(), symbol.getTextField(), Toast.LENGTH_SHORT).show();
                         SavedStopsFragment.stopViewModel.insertStop(GTFSStaticData.getStop(jsonResult));
-                        Toast.makeText(getContext(), "Stop " + jsonResult + " favourited!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), jsonElement.getAsJsonObject().get("stop_name").toString() + " favourited!", Toast.LENGTH_SHORT).show();
                     }
                 });
 
@@ -216,7 +216,7 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Perm
 
                         //if(SavedStopsFragment.stopViewModel.getStopById(jsonResult).length > 0){
                             SavedStopsFragment.stopViewModel.deleteStop(GTFSStaticData.getStop(jsonResult));
-                            Toast.makeText(getContext(), "Stop " + jsonResult + " un-favourited!", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getContext(), jsonElement.getAsJsonObject().get("stop_name").toString() + " un-favourited!", Toast.LENGTH_SHORT).show();
                         /*}else{
                             SavedStopsFragment.stopViewModel.insertStop(GTFSStaticData.getStop(jsonResult));
                             Toast.makeText(getContext(), "Stop " + jsonResult + " favourited!", Toast.LENGTH_SHORT).show();
