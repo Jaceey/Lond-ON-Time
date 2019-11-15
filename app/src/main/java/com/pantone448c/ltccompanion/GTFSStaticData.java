@@ -1,7 +1,6 @@
 package com.pantone448c.ltccompanion;
 
 import android.app.Application;
-import android.graphics.Color;
 import android.util.Log;
 
 import com.mapbox.geojson.Feature;
@@ -9,18 +8,17 @@ import com.mapbox.geojson.Point;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
+import org.javatuples.Triplet;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.sql.Time;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.TreeMap;
 
-import static android.graphics.Color.parseColor;
 
 /**
  * Contains helper functions for parsing GTFS Static Data
@@ -90,7 +88,7 @@ public class GTFSStaticData {
      *
      * @param route_id The bus route id for the specific trip
      * @param direction The direction of the trip you're looking for
-     * @param numTrips The number of trips you want to look up, 0 for all trips
+     * @param numTrips The number of trips you want to look up
      * @return an Array of Trip Objects
      */
     public static final Trip[] getTrips(int route_id, int direction, int numTrips)
@@ -344,6 +342,8 @@ public class GTFSStaticData {
         return  stopsArray;
     }
 
+
+
     /**
      *
      * @param routeid the route that we want to look up stops for
@@ -372,7 +372,11 @@ public class GTFSStaticData {
                         {
                             double lat = Double.parseDouble(record.get(4));
                             double lon = Double.parseDouble(record.get(5));
-                            features.add(Feature.fromGeometry(Point.fromLngLat(lon, lat)));
+                            Feature feature = Feature.fromGeometry(Point.fromLngLat(lon, lat));
+                            feature.addStringProperty("StopName", record.get(2));
+                            feature.addNumberProperty("StopID", Integer.parseInt(record.get(0)));
+                            feature.addNumberProperty("WheelChairBoarding", Integer.parseInt(record.get(11)));
+                            features.add(feature);
                         }
                     }
                 }
@@ -390,5 +394,231 @@ public class GTFSStaticData {
         Feature[] featuresArray = new Feature[features.size()];
         featuresArray = features.toArray(featuresArray);
         return  featuresArray;
+    }
+
+    /**
+     *
+     * @return list of stops
+     */
+    public static final Stop[] getStops()
+    {
+        ArrayList<Stop> stops = new ArrayList<>();
+        InputStream in = context.getResources().openRawResource(R.raw.stops);
+        Reader read = new InputStreamReader(in);
+
+        try
+        {
+            Iterable<CSVRecord> records = CSVFormat.RFC4180.parse(read);
+            int count = 0;
+            for (CSVRecord record: records)
+            {
+                if (count > 0)
+                {
+
+                    int stop_id = Integer.parseInt((record.get(0)));
+                    int stop_code;
+                    if (record.get(1) != "")
+                    {
+                        stop_code = Integer.parseInt((record.get(1)));
+                    }
+                    else
+                    {
+                        stop_code = 0;
+                    }
+                    String stop_name = record.get(2);
+                    float stop_lat = Float.parseFloat(record.get(4));
+                    float stop_lon = Float.parseFloat(record.get(5));
+                    int wheelchair_boarding = Integer.parseInt(record.get(11));
+                    stops.add(new Stop(stop_id, stop_code, stop_name, stop_lat, stop_lon, wheelchair_boarding));
+                }
+                ++count;
+            }
+        }
+        catch (IOException ex)
+        {
+            Log.e("IOException", ex.getMessage());
+        }
+        catch (IndexOutOfBoundsException ex)
+        {
+            Log.e("IndexOutofRange", ex.getMessage());
+        }
+        Stop[] stopsArray = new Stop[stops.size()];
+        stopsArray = stops.toArray(stopsArray);
+        return  stopsArray;
+    }
+
+
+
+    /**
+     *
+     * @return list features with the lat/lon for the stops
+     */
+    public static final Feature[] getStopsAsFeatures()
+    {
+        ArrayList<Feature> features = new ArrayList<>();
+        InputStream in = context.getResources().openRawResource(R.raw.stops);
+        Reader read = new InputStreamReader(in);
+
+        try
+        {
+            Iterable<CSVRecord> records = CSVFormat.RFC4180.parse(read);
+            int count = 0;
+            for (CSVRecord record: records)
+            {
+                if (count > 0)
+                {
+                    double lat = Double.parseDouble(record.get(4));
+                    double lon = Double.parseDouble(record.get(5));
+                    Feature feature = Feature.fromGeometry(Point.fromLngLat(lon, lat));
+                    feature.addStringProperty("StopName", record.get(2));
+                    feature.addNumberProperty("StopID", Integer.parseInt(record.get(0)));
+                    feature.addNumberProperty("WheelChairBoarding", Integer.parseInt(record.get(11)));
+                    features.add(feature);
+                }
+                ++count;
+            }
+        }
+        catch (IOException ex)
+        {
+            Log.e("IOException", ex.getMessage());
+        }
+        catch (IndexOutOfBoundsException ex)
+        {
+            Log.e("IndexOutofRange", ex.getMessage());
+        }
+        Feature[] featuresArray = new Feature[features.size()];
+        featuresArray = features.toArray(featuresArray);
+        return  featuresArray;
+    }
+
+    public static final Trip getTrip(int tripID)
+    {
+        InputStream in = context.getResources().openRawResource(R.raw.trips);
+        Reader read = new InputStreamReader(in);
+
+        try
+        {
+            Iterable<CSVRecord> records = CSVFormat.RFC4180.parse(read);
+            int count = 0;
+            for (CSVRecord record: records)
+            {
+                if (count > 0)
+                {
+                    if (Integer.parseInt(record.get(2)) == tripID)
+                    {
+                        int routeID = Integer.parseInt(record.get(0));
+                        int serviceID = Integer.parseInt(record.get(1));
+                        String tripHeadsign = record.get(3);
+                        Direction direction;
+                        Wheelchair_Accessible wheelchair_accessible;
+                        Bikes_Allowed bikes_allowed;
+                        if (record.get(5) == "1")
+                        {
+                            direction = Direction.ONEWAY;
+                        }
+                        else
+                        {
+                            direction = Direction.OTHERWAY;
+                        }
+
+                        if (record.get(8) == "1")
+                        {
+                            wheelchair_accessible = Wheelchair_Accessible.WHEELCHAIRS;
+                        }
+                        else if (record.get(8) == "2")
+                        {
+                            wheelchair_accessible = Wheelchair_Accessible.NOWHEELCHAIRS;
+                        }
+                        else
+                        {
+                            wheelchair_accessible = Wheelchair_Accessible.NOINFO;
+                        }
+
+                        if (record.get(9) == "1")
+                        {
+                            bikes_allowed = Bikes_Allowed.BIKES;
+                        }
+                        else if (record.get(9) == "2")
+                        {
+                            bikes_allowed = Bikes_Allowed.NOBIKES;
+                        }
+                        else
+                        {
+                            bikes_allowed = Bikes_Allowed.NOINFO;
+                        }
+                        return new Trip(routeID, serviceID, tripID, tripHeadsign, direction, wheelchair_accessible, bikes_allowed);
+                    }
+                }
+                ++count;
+            }
+        }
+        catch (IOException ex)
+        {
+            Log.e("IOException", ex.getMessage());
+        }
+        catch (IndexOutOfBoundsException ex)
+        {
+            Log.e("IndexOutofRange", ex.getMessage());
+        }
+        throw new NullPointerException();
+    }
+
+    public static final Triplet<Route, StopTime, Trip>[] getBusesForStop(int stopID, int numTrips)
+    {
+        ArrayList<Triplet<Route, StopTime, Trip>> output = new ArrayList<>();
+        InputStream in = context.getResources().openRawResource(R.raw.stop_times);
+        Reader read = new InputStreamReader(in);
+        try
+        {
+            Iterable<CSVRecord> records = CSVFormat.RFC4180.parse(read);
+            int count = 0;
+            int countTrips = 0;
+            for (CSVRecord record: records)
+            {
+                if (count > 0) {
+                    if (countTrips < numTrips) {
+                        if (Integer.parseInt(record.get(3)) == stopID) {
+                            String[] arrivalTime = record.get(1).split(":");
+                            int hour = Integer.parseInt(arrivalTime[0].trim());
+                            int minute = Integer.parseInt(arrivalTime[1].trim());
+                            int second = Integer.parseInt((arrivalTime[2].trim()));
+                            int seconds = (hour * 60 * 60) + (minute * 60) + second;
+
+                            int curHour = LocalDateTime.now().getHour();
+                            int curMinute = LocalDateTime.now().getMinute();
+                            int curSecond = LocalDateTime.now().getSecond();
+                            int curSeconds = (curHour * 60 * 60) + (curMinute * 60) + curSecond;
+
+                            if (seconds > curSeconds) {
+                                int tripID = Integer.parseInt(record.get(0));
+                                int stopSequence = Integer.parseInt(record.get(4));
+                                StopTime stopTime = new StopTime(tripID, record.get(1), record.get(2), stopID, stopSequence);
+                                Trip trip = getTrip(tripID);
+                                Route route = Routes.getRoute(trip.ROUTE_ID);
+                                output.add(new Triplet<>(route, stopTime, trip));
+                                ++countTrips;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                ++count;
+            }
+        }
+        catch (IOException ex)
+        {
+            Log.e("IOException", ex.getMessage());
+        }
+        catch (IndexOutOfBoundsException ex)
+        {
+            Log.e("IndexOutofRange", ex.getMessage());
+        }
+
+        Triplet<Route, StopTime, Trip>[] outputArray = new Triplet[output.size()];
+        outputArray = output.toArray(outputArray);
+        return outputArray;
     }
 }
