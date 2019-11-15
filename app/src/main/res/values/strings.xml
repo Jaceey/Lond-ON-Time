@@ -24,6 +24,10 @@
     <string name="menu_share">Share</string>
     <string name="menu_send">Send</string>
 
+    <string name="savedstops_stopid">Stop ID</string>
+
+    <string name="placeholder">Placeholder</string>
+
     <string name="mapbox_cust_style">mapbox://styles/gensyll/ck2z4iba743mz1cp874euyhqf</string>
 
     <!-- TODO: Remove or change this placeholder text -->

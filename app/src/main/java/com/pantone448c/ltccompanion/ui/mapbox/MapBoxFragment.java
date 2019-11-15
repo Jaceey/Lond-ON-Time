@@ -75,7 +75,7 @@ import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconOffset;
 
 public class MapBoxFragment extends Fragment implements OnMapReadyCallback, PermissionsListener {
 
-    private static MapView mapView;
+    private MapView mapView;
     private static MapboxMap mapboxMap;
     private Context context;
     private View mapBoxFragmentView;
@@ -93,18 +93,18 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Perm
             .build();
 
     //Handles device location
-    private static LocationEngine locationEngine;
+    private LocationEngine locationEngine;
     private long DEFAULT_INTERVAL_IN_MILLISECONDS = 1000L;
     private long DEFAULT_MAX_WAIT_TIME = DEFAULT_INTERVAL_IN_MILLISECONDS * 3;
     private MapBoxActivityLocationCallback callback = new MapBoxActivityLocationCallback(this);
     public static LatLng lastDeviceLocation = LONDON_COORDS;
 
     //Mapbox Symbol/Marker Generation
-    private static FeatureCollection featureCollection;    /* A GeoJSON collection, used to store locations for markers in Mapbox */
-    private static SymbolManager symbolManager;
-    private static List<SymbolOptions> symbolOptions;
+    private FeatureCollection featureCollection;    /* A GeoJSON collection, used to store locations for markers in Mapbox */
+    private SymbolManager symbolManager;
+    private List<SymbolOptions> symbolOptions;
 
-    private static BuildingPlugin buildingPlugin;
+    private BuildingPlugin buildingPlugin;
 
     @Override
     public void onAttach(Context context)
@@ -116,12 +116,15 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Perm
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setRetainInstance(true);
     }   /*onCreate*/
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        mapBoxFragmentView = inflater.inflate(R.layout.fragment_map_box, container, false);
+        if(savedInstanceState == null){
+            mapBoxFragmentView = inflater.inflate(R.layout.fragment_map_box, container, false);
+        }
         return mapBoxFragmentView;
     }   /*onCreateView*/
 
@@ -139,21 +142,13 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Perm
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
 
+        featureCollection = FeatureCollection.fromFeatures(GTFSStaticData.getStopsAsFeatures());
         symbolOptions = new ArrayList<>();
     }
 
     @SuppressLint("WrongConstant")
     @Override
     public void onMapReady(@NonNull final MapboxMap mapboxMap){
-        //TODO: Populate featureCollection with test markers
-        long startTime = System.nanoTime();
-
-        featureCollection = FeatureCollection.fromFeatures(GTFSStaticData.getStopsAsFeatures());
-        long endTime = System.nanoTime();
-        long duration = (endTime - startTime) / 1000000;
-        Toast myToast = Toast.makeText(context, "Loaded in " + duration + "ms", Toast.LENGTH_LONG);
-        myToast.show();
-
         //TODO: Initialize Map
         this.mapboxMap = mapboxMap;
 
@@ -388,6 +383,7 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Perm
         super.onSaveInstanceState(outState);
         mapView.onSaveInstanceState(outState);
     }   /*onSaveInstanceState*/
+
 
     @Override
     public void onConfigurationChanged(Configuration newConfig){
