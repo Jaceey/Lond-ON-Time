@@ -55,8 +55,8 @@ public class SavedStopsAdapter extends RecyclerView.Adapter<SavedStopsAdapter.Vi
     public void onBindViewHolder(ViewHolder holder, int position){
         Stop stop = savedStops.get(position);
 
-        holder.stopId.setText(stop.STOP_ID);
-        holder.stopName.setText(stop.STOP_NAME);
+        holder.stopId.setText(stop.STOP_ID + "");
+        holder.stopName.setText(stop.STOP_NAME + "");
     }
 
     @Override

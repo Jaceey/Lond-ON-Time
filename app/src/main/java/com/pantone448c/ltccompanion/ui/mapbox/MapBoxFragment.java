@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.AttributeSet;
@@ -74,7 +75,7 @@ import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconOffset;
 
 public class MapBoxFragment extends Fragment implements OnMapReadyCallback, PermissionsListener {
 
-    private MapView mapView;
+    private static MapView mapView;
     private static MapboxMap mapboxMap;
     private Context context;
     private View mapBoxFragmentView;
@@ -92,18 +93,18 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Perm
             .build();
 
     //Handles device location
-    private LocationEngine locationEngine;
+    private static LocationEngine locationEngine;
     private long DEFAULT_INTERVAL_IN_MILLISECONDS = 1000L;
     private long DEFAULT_MAX_WAIT_TIME = DEFAULT_INTERVAL_IN_MILLISECONDS * 3;
     private MapBoxActivityLocationCallback callback = new MapBoxActivityLocationCallback(this);
     public static LatLng lastDeviceLocation = LONDON_COORDS;
 
     //Mapbox Symbol/Marker Generation
-    private FeatureCollection featureCollection;    /* A GeoJSON collection, used to store locations for markers in Mapbox */
-    private SymbolManager symbolManager;
-    private List<SymbolOptions> symbolOptions;
+    private static FeatureCollection featureCollection;    /* A GeoJSON collection, used to store locations for markers in Mapbox */
+    private static SymbolManager symbolManager;
+    private static List<SymbolOptions> symbolOptions;
 
-    private BuildingPlugin buildingPlugin;
+    private static BuildingPlugin buildingPlugin;
 
     @Override
     public void onAttach(Context context)
@@ -387,5 +388,11 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Perm
         super.onSaveInstanceState(outState);
         mapView.onSaveInstanceState(outState);
     }   /*onSaveInstanceState*/
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig){
+        super.onConfigurationChanged(newConfig);
+
+    }
 
 }   /*MapBoxFragment*/
