@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.AttributeSet;
@@ -15,6 +16,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.android.core.location.LocationEngineCallback;
 import com.mapbox.android.core.location.LocationEngineProvider;
@@ -40,6 +44,7 @@ import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.mapboxsdk.plugins.annotation.OnSymbolClickListener;
+import com.mapbox.mapboxsdk.plugins.annotation.OnSymbolLongClickListener;
 import com.mapbox.mapboxsdk.plugins.annotation.Symbol;
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager;
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions;
@@ -47,7 +52,12 @@ import com.mapbox.mapboxsdk.plugins.building.BuildingPlugin;
 import com.mapbox.mapboxsdk.plugins.markerview.MarkerViewManager;
 import com.pantone448c.ltccompanion.GTFSStaticData;
 import com.pantone448c.ltccompanion.R;
+import com.pantone448c.ltccompanion.Stop;
+import com.pantone448c.ltccompanion.ui.savedstops.SavedStopsFragment;
 
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
@@ -107,12 +117,15 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Perm
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setRetainInstance(true);
     }   /*onCreate*/
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        mapBoxFragmentView = inflater.inflate(R.layout.fragment_map_box, container, false);
+        if(savedInstanceState == null){
+            mapBoxFragmentView = inflater.inflate(R.layout.fragment_map_box, container, false);
+        }
         return mapBoxFragmentView;
     }   /*onCreateView*/
 
@@ -130,21 +143,13 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Perm
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
 
+        featureCollection = FeatureCollection.fromFeatures(GTFSStaticData.getStopsAsFeatures());
         symbolOptions = new ArrayList<>();
     }
 
     @SuppressLint("WrongConstant")
     @Override
     public void onMapReady(@NonNull final MapboxMap mapboxMap){
-        //TODO: Populate featureCollection with test markers
-        long startTime = System.nanoTime();
-
-        featureCollection = FeatureCollection.fromFeatures(GTFSStaticData.getStopsAsFeatures());
-        long endTime = System.nanoTime();
-        long duration = (endTime - startTime) / 1000000;
-        Toast myToast = Toast.makeText(context, "Loaded in " + duration + "ms", Toast.LENGTH_LONG);
-        myToast.show();
-
         //TODO: Initialize Map
         this.mapboxMap = mapboxMap;
 
@@ -166,14 +171,28 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Perm
                 symbolManager = new SymbolManager(mapView, mapboxMap, style);
                 symbolManager.setIconAllowOverlap(true);
                 symbolManager.setTextAllowOverlap(true);
+
+                //Set up the symbols from the featurecollection
+                Gson gson = new Gson();
                 for(Feature feat : featureCollection.features()){
-                    symbolOptions.add(
-                            new SymbolOptions()
-                                    .withGeometry((Point)feat.geometry())
-                                    .withIconImage("bus-11")
-                                    .withTextField(feat.getStringProperty("stop_name"))
-                                    .withTextOpacity(0.0f)  //Hides the stop name from the map
-                    );
+                    try {
+                        JSONObject jsonObj = new JSONObject();
+                        jsonObj.put("stop_id", feat.getNumberProperty("stop_id"));
+                        jsonObj.put("stop_code", feat.getNumberProperty("stop_code"));
+                        jsonObj.put("stop_name", feat.getStringProperty("stop_name"));
+
+                        symbolOptions.add(
+                                new SymbolOptions()
+                                        .withGeometry((Point)feat.geometry())
+                                        .withIconImage("bus-11")
+                                        .withData(gson.fromJson(jsonObj.toString(), JsonElement.class))
+                                        .withTextField(feat.getStringProperty("stop_name"))
+                                        .withTextOpacity(0.0f)  //Hides the stop name from the map
+                        );
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Log.e(getString(R.string.debug_tag), e.getMessage());
+                    }
                 }
                 Log.d(getString(R.string.debug_tag), symbolOptions.size() + " stops loaded");
                 symbolManager.create(symbolOptions);
@@ -182,6 +201,17 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Perm
                     @Override
                     public void onAnnotationClick(Symbol symbol){
                         Toast.makeText(getContext(), symbol.getTextField(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+                symbolManager.addLongClickListener(new OnSymbolLongClickListener() {
+                    @Override
+                    public void onAnnotationLongClick(Symbol symbol) {
+                        JsonElement jsonElement = symbol.getData();
+                        String jsonResult = jsonElement.getAsJsonObject().get("stop_id").toString();
+
+                        SavedStopsFragment.stopViewModel.insertStop(GTFSStaticData.getStop(Integer.parseInt(jsonResult)));
+                        Toast.makeText(getContext(), "Stop " + jsonResult + " favourited!", Toast.LENGTH_SHORT).show();
                     }
                 });
             }
@@ -355,5 +385,12 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Perm
         super.onSaveInstanceState(outState);
         mapView.onSaveInstanceState(outState);
     }   /*onSaveInstanceState*/
+
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig){
+        super.onConfigurationChanged(newConfig);
+
+    }
 
 }   /*MapBoxFragment*/

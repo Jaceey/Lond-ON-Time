@@ -3,6 +3,7 @@ package com.pantone448c.ltccompanion.ui.savedstops;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -17,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.pantone448c.ltccompanion.R;
 import com.pantone448c.ltccompanion.SavedStopsAdapter;
 import com.pantone448c.ltccompanion.Stop;
+import com.pantone448c.ltccompanion.ui.mapbox.MapBoxFragment;
 import com.pantone448c.ltccompanion.viewmodels.StopViewModel;
 
 import java.util.ArrayList;
@@ -28,7 +30,7 @@ public class SavedStopsFragment extends Fragment {
     private SavedStopsAdapter mAdapter;
     private RecyclerView.LayoutManager layoutManager;
     private View stopsFragmentView;
-    private StopViewModel stopViewModel;
+    public static StopViewModel stopViewModel;
 
     @Override
     public void onAttach(Context context)
@@ -53,15 +55,15 @@ public class SavedStopsFragment extends Fragment {
         recyclerView.setLayoutManager(layoutManager);
 
         mAdapter = new SavedStopsAdapter();
-        stopViewModel = new ViewModelProvider(getActivity()).get(StopViewModel.class);
+
         stopViewModel.getStops().observe(getActivity(), new Observer<List<Stop>>() {
             @Override
             public void onChanged(@Nullable final List<Stop> stops) {
                 mAdapter.setStops(stops);
             }
         });
-
         recyclerView.setAdapter(mAdapter);
+
         return stopsFragmentView;
     }
 
@@ -69,6 +71,5 @@ public class SavedStopsFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState)
     {
         super.onActivityCreated(savedInstanceState);
-
     }
 }
