@@ -23,11 +23,11 @@ public final class Routes {
 
     public static Route getRoute(int routeID)
     {
-        for (int i = 0; i<_instance.routes.size(); ++i)
+        for (int i = 0; i<getRoutes().size(); ++i)
         {
-            if (_instance.routes.get(i).ROUTE_ID == routeID)
+            if (getRoutes().get(i).ROUTE_GID == routeID)
             {
-                return _instance.routes.get(i);
+                return getRoutes().get(i);
             }
         }
         throw new NullPointerException();

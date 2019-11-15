@@ -21,6 +21,8 @@ import androidx.appcompat.widget.Toolbar;
 
 import android.view.Menu;
 
+import org.javatuples.Triplet;
+
 public class NavigationDrawerActivity extends AppCompatActivity {
 
     private AppBarConfiguration mAppBarConfiguration;
@@ -31,6 +33,7 @@ public class NavigationDrawerActivity extends AppCompatActivity {
         GTFSStaticData.initContext(this.getApplication());
         setContentView(R.layout.activity_navigation_drawer);
 
+        Triplet<Route, StopTime, Trip>[] list = GTFSStaticData.getBusesForStop(598, 3);
         //Navigation Bar Configuration
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
