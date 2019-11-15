@@ -13,6 +13,7 @@
     <string name="nav_header_desc">Navigation Header</string>
     <string name="action_settings">Settings</string>
     <string name="action_resetPosition">Reset camera position</string>
+    <string name="action_centerCamLondon">Focus Camera on London</string>
 
     <string name="menu_map">Bus Map</string>
     <string name="menu_routes">View Routes</string>

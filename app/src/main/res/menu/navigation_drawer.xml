@@ -11,4 +11,9 @@
         android:orderInCategory="200"
         android:title="@string/action_resetPosition"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/action_centerCameraLondon"
+        android:orderInCategory="200"
+        android:title="@string/action_centerCamLondon"
+        app:showAsAction="never" />
 </menu>

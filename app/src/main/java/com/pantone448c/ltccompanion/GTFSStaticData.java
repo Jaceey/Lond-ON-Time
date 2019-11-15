@@ -476,13 +476,37 @@ public class GTFSStaticData {
             {
                 if (count > 0)
                 {
-                    double lat = Double.parseDouble(record.get(4));
+                    int stop_id = Integer.parseInt((record.get(0)));
+                    int stop_code;
+                    if (record.get(1) != "")
+                    {
+                        stop_code = Integer.parseInt((record.get(1)));
+                    }
+                    else
+                    {
+                        stop_code = 0;
+                    }
+                    String stop_name = record.get(2);
+                    float stop_lat = Float.parseFloat(record.get(4));
+                    float stop_lon = Float.parseFloat(record.get(5));
+                    int wheelchair_boarding = Integer.parseInt(record.get(11));
+
+                    Feature newFeat = Feature.fromGeometry(Point.fromLngLat(stop_lon, stop_lat));
+                    newFeat.addNumberProperty("stop_id", stop_id);
+                    newFeat.addNumberProperty("stop_code", stop_code);
+                    newFeat.addStringProperty("stop_name", stop_name);
+                    newFeat.addNumberProperty("stop_lat", stop_lat);
+                    newFeat.addNumberProperty("stop_lon", stop_lon);
+                    newFeat.addNumberProperty("wheelchair_boarding", wheelchair_boarding);
+
+                    features.add(newFeat);
+                    /*double lat = Double.parseDouble(record.get(4));
                     double lon = Double.parseDouble(record.get(5));
                     Feature feature = Feature.fromGeometry(Point.fromLngLat(lon, lat));
                     feature.addStringProperty("StopName", record.get(2));
                     feature.addNumberProperty("StopID", Integer.parseInt(record.get(0)));
                     feature.addNumberProperty("WheelChairBoarding", Integer.parseInt(record.get(11)));
-                    features.add(feature);
+                    features.add(feature);*/
                 }
                 ++count;
             }
