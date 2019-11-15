@@ -153,7 +153,7 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Perm
         }
 
         featureCollection = FeatureCollection.fromJson(resultingJson);*/
-        featureCollection = FeatureCollection.fromFeatures(GTFSStaticData.getStopsAsFeatures(3971, 0));
+        featureCollection = FeatureCollection.fromFeatures(GTFSStaticData.getStopsAsFeatures());
         long endTime = System.nanoTime();
         long duration = (endTime - startTime) / 1000000;
         Toast myToast = Toast.makeText(context, Long.toString(duration), Toast.LENGTH_LONG);
