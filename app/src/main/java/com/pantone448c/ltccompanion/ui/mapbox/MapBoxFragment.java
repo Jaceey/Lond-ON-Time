@@ -184,9 +184,9 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Mapb
                     symbolOptions.add(
                             new SymbolOptions()
                                     .withGeometry((Point)feat.geometry())
-                                    .withIconImage("bus")
-                                    .withTextField(feat.getStringProperty("StopID") + "")
-                                    .withTextOffset(new Float[]{0.0f ,1.0f})
+                                    .withIconImage("bus-11")
+                                    .withTextField(feat.getStringProperty("stop_name"))
+                                    .withTextOpacity(0.0f)
                     );
                 }
                 Log.d(getString(R.string.debug_tag), symbolOptions.size() + " stops loaded");
@@ -195,17 +195,15 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Mapb
                 symbolManager.addClickListener(new OnSymbolClickListener(){
                     @Override
                     public void onAnnotationClick(Symbol symbol){
-                        double distance = symbol.getLatLng().distanceTo(lastDeviceLocation) / 1000.0;
-                        Toast.makeText(getContext(),  "Stop " + symbol.getTextField(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), symbol.getTextField(), Toast.LENGTH_SHORT).show();
                     }
                 });
-
-                //mapboxMap.addOnMapClickListener(MapBoxFragment.this);
             }
         });
 
         //Configure initial camera position
         ResetCameraPosition(false);
+
     }   /*onMapReady*/
 
     public static void ResetCameraPosition(boolean smoothPan){
