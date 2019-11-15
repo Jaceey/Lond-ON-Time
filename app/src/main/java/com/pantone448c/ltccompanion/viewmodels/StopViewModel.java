@@ -26,6 +26,11 @@ public class StopViewModel extends AndroidViewModel {
         return stops;
     }
 
+    public Stop getStopById(Stop stop){
+        stopRepo.getStopByID(stop);
+        return stopRepo.getFirstResult();
+    }
+
     public void insertStop(Stop stop)
     {
         stopRepo.insertStop(stop);
