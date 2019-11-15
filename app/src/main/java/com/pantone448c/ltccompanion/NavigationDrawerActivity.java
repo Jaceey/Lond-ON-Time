@@ -10,6 +10,7 @@ import android.view.View;
 
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -17,6 +18,7 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.navigation.NavigationView;
 import com.pantone448c.ltccompanion.ui.mapbox.MapBoxFragment;
+import com.pantone448c.ltccompanion.viewmodels.StopViewModel;
 
 import androidx.drawerlayout.widget.DrawerLayout;
 
@@ -29,12 +31,16 @@ import android.widget.Toast;
 public class NavigationDrawerActivity extends AppCompatActivity {
 
     private AppBarConfiguration mAppBarConfiguration;
+    private StopViewModel stopViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         GTFSStaticData.initContext(this.getApplication());
         setContentView(R.layout.activity_navigation_drawer);
+
+        //StopViewModel
+        stopViewModel = new ViewModelProvider(this).get(StopViewModel.class);
 
         //Navigation Bar Configuration
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -46,7 +52,7 @@ public class NavigationDrawerActivity extends AppCompatActivity {
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_map_box, R.id.nav_routes)
+                R.id.nav_map_box, R.id.nav_routes, R.id.nav_savedstops)
                 .setDrawerLayout(drawer)
                 .build();
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
