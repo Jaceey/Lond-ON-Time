@@ -70,6 +70,8 @@ public class NavigationDrawerActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        FragmentManager manager;
+        MapBoxFragment frag;
         switch (item.getItemId()) {
             case R.id.action_settings:
                 // User chose the "Settings" item, show the app settings UI...
@@ -79,9 +81,15 @@ public class NavigationDrawerActivity extends AppCompatActivity {
             case R.id.action_resetCameraPos:
                 // User chose the "Reset camera position" action,
                 // reset the camera...
-                FragmentManager manager = getSupportFragmentManager();
-                MapBoxFragment frag = (MapBoxFragment) manager.findFragmentById(R.id.nav_map_box);
-                frag.ResetCameraPosition(true);
+                manager = getSupportFragmentManager();
+                frag = (MapBoxFragment) manager.findFragmentById(R.id.nav_map_box);
+                frag.ResetCameraPosition(MapBoxFragment.lastDeviceLocation, true);
+                return true;
+
+            case R.id.action_centerCameraLondon:
+                manager = getSupportFragmentManager();
+                frag = (MapBoxFragment) manager.findFragmentById(R.id.nav_map_box);
+                frag.ResetCameraPosition(MapBoxFragment.LONDON_COORDS, true);
                 return true;
 
             default:

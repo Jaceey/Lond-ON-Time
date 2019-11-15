@@ -75,7 +75,7 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Perm
     private PermissionsManager permissionsManager;
 
     //MapView Boundaries Declarations
-    private static final LatLng LONDON_COORDS = new LatLng(42.983612, -81.249725);
+    public static final LatLng LONDON_COORDS = new LatLng(42.983612, -81.249725);
     private static final LatLng BOUND_CORNER_NW = new LatLng(LONDON_COORDS.getLatitude() - 0.25,LONDON_COORDS.getLongitude() - 0.25);
     private static final LatLng BOUND_CORNER_SE = new LatLng(LONDON_COORDS.getLatitude() + 0.25,LONDON_COORDS.getLongitude() + 0.25);
     private static final LatLngBounds RESTRICTED_BOUNDS_AREA = new LatLngBounds.Builder()
@@ -88,7 +88,7 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Perm
     private long DEFAULT_INTERVAL_IN_MILLISECONDS = 1000L;
     private long DEFAULT_MAX_WAIT_TIME = DEFAULT_INTERVAL_IN_MILLISECONDS * 3;
     private MapBoxActivityLocationCallback callback = new MapBoxActivityLocationCallback(this);
-    private static LatLng lastDeviceLocation = LONDON_COORDS;
+    public static LatLng lastDeviceLocation = LONDON_COORDS;
 
     //Mapbox Symbol/Marker Generation
     private FeatureCollection featureCollection;    /* A GeoJSON collection, used to store locations for markers in Mapbox */
@@ -139,24 +139,10 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Perm
         //TODO: Populate featureCollection with test markers
         long startTime = System.nanoTime();
 
-        /*String resultingJson = "";
-        try{
-            //Load GeoJSON file from local assets
-            InputStream is = getActivity().getAssets().open("london_stops.geojson");
-            int size = is.available();
-            byte[] buffer = new byte[size];
-            is.read(buffer);
-            is.close();
-            resultingJson =  new String(buffer, Charset.forName("UTF-8"));
-        }catch(Exception ex){
-            throw new RuntimeException(ex);
-        }
-
-        featureCollection = FeatureCollection.fromJson(resultingJson);*/
         featureCollection = FeatureCollection.fromFeatures(GTFSStaticData.getStopsAsFeatures());
         long endTime = System.nanoTime();
         long duration = (endTime - startTime) / 1000000;
-        Toast myToast = Toast.makeText(context, Long.toString(duration), Toast.LENGTH_LONG);
+        Toast myToast = Toast.makeText(context, "Loaded in " + duration + "ms", Toast.LENGTH_LONG);
         myToast.show();
 
         //TODO: Initialize Map
@@ -174,7 +160,7 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Perm
 
                 //Configure building extrusion plugin
                 buildingPlugin = new BuildingPlugin(mapView, mapboxMap, style);
-                buildingPlugin.setMinZoomLevel(11f);
+                buildingPlugin.setMinZoomLevel(12f);
                 buildingPlugin.setVisibility(true);
 
                 symbolManager = new SymbolManager(mapView, mapboxMap, style);
@@ -186,7 +172,7 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Perm
                                     .withGeometry((Point)feat.geometry())
                                     .withIconImage("bus-11")
                                     .withTextField(feat.getStringProperty("stop_name"))
-                                    .withTextOpacity(0.0f)
+                                    .withTextOpacity(0.0f)  //Hides the stop name from the map
                     );
                 }
                 Log.d(getString(R.string.debug_tag), symbolOptions.size() + " stops loaded");
@@ -202,26 +188,28 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Perm
         });
 
         //Configure initial camera position
-        ResetCameraPosition(false);
+        ResetCameraPosition(lastDeviceLocation, false);
 
     }   /*onMapReady*/
 
-    public static void ResetCameraPosition(boolean smoothPan){
+    public static void ResetCameraPosition(LatLng newCameraPos, boolean smoothPan){
         if(smoothPan){
             mapboxMap.animateCamera(
                     CameraUpdateFactory.newCameraPosition(
                             new CameraPosition.Builder()
-                                    .target(lastDeviceLocation)     //Camera location on launch
-                                    .zoom(12f)                      //Camera zoom on launch (Building extrusions show <= 15)
+                                    .target(newCameraPos)     //Camera location on launch
+                                    .zoom(16f)                      //Camera zoom on launch (Building extrusions show <= 15)
                                     .tilt(30.0)                     //Camera angle on launch (0-60)
+                                    .bearing(0.0)
                                     .build()
                     ), 2500);
         }else{
             mapboxMap.setCameraPosition(
                     new CameraPosition.Builder()
-                            .target(lastDeviceLocation)     //Camera location on launch
-                            .zoom(12f)                      //Camera zoom on launch (Building extrusions show <= 15)
+                            .target(newCameraPos)     //Camera location on launch
+                            .zoom(16f)                      //Camera zoom on launch (Building extrusions show <= 15)
                             .tilt(30.0)                     //Camera angle on launch (0-60)
+                            .bearing(0.0)
                             .build()
             );
         }
