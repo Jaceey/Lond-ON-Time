@@ -23,7 +23,7 @@ import java.util.concurrent.TimeoutException;
 public class RouteBuilder implements Runnable
 {
     private static final String GOOGLEMAPSDIRECTIONAPI = "http://maps.googleapis.com/maps/api/directions/json?key=AIzaSyBem8E_gphjPMqF65s_s46c3gxxd-IpcjA&mode=transit";
-
+    private static final String sampleRESTAPI = "https://hatchways.io/api/assessment/blog/posts?tag=";
     //private static RequestQueue queue;
 
     private static Context mycontext;
@@ -106,7 +106,7 @@ public class RouteBuilder implements Runnable
         RequestQueue myqueue = Volley.newRequestQueue(mycontext);
         String URL = stringBuilder.toString();
 
-        JsonObjectRequest request = new JsonObjectRequest(URL, null, future, future);
+        JsonObjectRequest request = new JsonObjectRequest(sampleRESTAPI, null, future, future);
 
 
         try {
