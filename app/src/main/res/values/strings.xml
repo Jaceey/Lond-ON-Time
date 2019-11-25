@@ -24,5 +24,10 @@
 
     <string name="lblStartAddress">Start Address</string>
     <string name="lblEndAddress">Destination Address</string>
+    <string name="durationLabel">Duration</string>
+    <string name="distanceLabel">Distance</string>
+    <string name="arrivalTimeLbl">Arrival Time</string>
+    <string name="departureTimeLbl">Departure Time</string>
+    <string name="rideStopsLbl">#Stops till Destination</string>
 
 </resources>
