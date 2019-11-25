@@ -72,7 +72,6 @@
         android:id="@+id/submitSearch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:onClick="updateDirections"
         android:src="@android:drawable/ic_menu_send"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

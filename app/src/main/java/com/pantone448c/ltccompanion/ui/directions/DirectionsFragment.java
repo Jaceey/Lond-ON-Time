@@ -5,16 +5,25 @@ import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.Toast;
 
 import com.pantone448c.ltccompanion.R;
 
 public class DirectionsFragment extends Fragment {
 
     private Context context;
+    private ImageButton getDirectionsBtn;
+    private EditText startAddress;
+    private EditText endAddress;
+    private RecyclerView recyclerView;
+    private DirectionsAdapter adapter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -40,7 +49,28 @@ public class DirectionsFragment extends Fragment {
         super.onDetach();
     }
 
-    public void updateDirections(View view) {
 
+    @Override
+    public void onStart()
+    {
+        super.onStart();
+        adapter = new DirectionsAdapter();
+        recyclerView = getActivity().findViewById(R.id.directions);
+        recyclerView.setAdapter(adapter);
+        startAddress = getActivity().findViewById(R.id.startAddress);
+        endAddress = getActivity().findViewById(R.id.endAddress);
+        getDirectionsBtn = getActivity().findViewById(R.id.submitSearch);
+        getDirectionsBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getDirections();
+            }
+        });
     }
+
+    private void getDirections()
+    {
+        adapter.setTrip(RouteBuilder.getDirections(startAddress.getText().toString(), endAddress.getText().toString()));
+    }
+
 }
