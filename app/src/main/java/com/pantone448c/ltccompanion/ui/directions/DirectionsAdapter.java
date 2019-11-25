@@ -1,5 +1,6 @@
 package com.pantone448c.ltccompanion.ui.directions;
 
+import android.text.Html;
 import android.view.View;
 import android.view.ViewGroup;
 
