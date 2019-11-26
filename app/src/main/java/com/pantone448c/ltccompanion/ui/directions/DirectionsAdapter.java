@@ -34,18 +34,12 @@ public class DirectionsAdapter extends RecyclerView.Adapter<DirectionsAdapter.Vi
 
     public class WalkingViewHolder extends DirectionsAdapter.ViewHolder
     {
-        public RecyclerView subSteps;
-        public DirectionsAdapter subStepAdapter;
         public WalkingViewHolder(View itemView)
         {
             super(itemView);
             distance = itemView.findViewById(R.id.distanceValW);
             duration = itemView.findViewById(R.id.durationValW);
             instructions = itemView.findViewById(R.id.directionsW);
-            subSteps = itemView.findViewById(R.id.subSteps);
-            subStepAdapter = new DirectionsAdapter();
-            subSteps.setAdapter(subStepAdapter);
-            subSteps.setLayoutManager(new LinearLayoutManager(context));
         }
     }
 
@@ -113,11 +107,6 @@ public class DirectionsAdapter extends RecyclerView.Adapter<DirectionsAdapter.Vi
         {
             WalkingViewHolder wHolder = (WalkingViewHolder)holder;
             WalkingStep step = (WalkingStep)steps[position];
-            if (step.steps != null)
-            {
-                wHolder.subStepAdapter.setSteps(step.steps);
-            }
-
         }
         else if(holder.getClass().equals(TransitViewHolder.class))
         {

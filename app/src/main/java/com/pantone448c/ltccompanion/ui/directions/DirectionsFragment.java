@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +17,8 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.pantone448c.ltccompanion.R;
+
+import java.util.ArrayList;
 
 public class DirectionsFragment extends Fragment {
 
@@ -73,7 +76,30 @@ public class DirectionsFragment extends Fragment {
     private void getDirections()
     {
         TransitTrip trip = RouteBuilder.getDirections(startAddress.getText().toString(), endAddress.getText().toString());
-        adapter.setSteps(trip.routes[0].legs[0].steps);
+        Step[] steps = convertSteps(trip.routes[0].legs[0].steps);
+        adapter.setSteps(steps);
+    }
+
+    private Step[] convertSteps(Step[] steps)
+    {
+        ArrayList<Step> newSteps = new ArrayList<>();
+        for (int i=0; i<steps.length; ++i)
+        {
+            steps[i].html_instructions = Html.fromHtml(steps[i].html_instructions, Html.FROM_HTML_MODE_COMPACT, null, null).toString();
+            newSteps.add(steps[i]);
+            if (steps[i].getClass().equals(WalkingStep.class))
+            {
+                WalkingStep step = (WalkingStep)steps[i];
+                for (int n=0; n<step.steps.length; ++n)
+                {
+                    step.steps[n].html_instructions = Html.fromHtml(step.steps[n].html_instructions, Html.FROM_HTML_MODE_COMPACT, null, null).toString();
+                    newSteps.add(step.steps[n]);
+                }
+            }
+        }
+        Step[] arraySteps = new Step[newSteps.size()];
+        arraySteps = newSteps.toArray(arraySteps);
+        return arraySteps;
     }
 
 }
