@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
@@ -57,6 +58,7 @@ public class DirectionsFragment extends Fragment {
         adapter = new DirectionsAdapter();
         recyclerView = getActivity().findViewById(R.id.directions);
         recyclerView.setAdapter(adapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(context));
         startAddress = getActivity().findViewById(R.id.startAddress);
         endAddress = getActivity().findViewById(R.id.endAddress);
         getDirectionsBtn = getActivity().findViewById(R.id.submitSearch);
@@ -70,7 +72,8 @@ public class DirectionsFragment extends Fragment {
 
     private void getDirections()
     {
-        adapter.setTrip(RouteBuilder.getDirections(startAddress.getText().toString(), endAddress.getText().toString()));
+        TransitTrip trip = RouteBuilder.getDirections(startAddress.getText().toString(), endAddress.getText().toString());
+        adapter.setSteps(trip.routes[0].legs[0].steps);
     }
 
 }

@@ -1,4 +1,4 @@
-package com.pantone448c.ltccompanion;
+package com.pantone448c.ltccompanion.GTFSData;
 
 import android.util.Log;
 

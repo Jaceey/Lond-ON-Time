@@ -7,7 +7,6 @@ import androidx.fragment.app.Fragment;
 import android.content.Context;
 import android.location.Location;
 import android.os.Bundle;
-import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,7 +38,7 @@ import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.mapboxsdk.plugins.building.BuildingPlugin;
 import com.mapbox.mapboxsdk.plugins.markerview.MarkerViewManager;
-import com.pantone448c.ltccompanion.GTFSStaticData;
+import com.pantone448c.ltccompanion.GTFSData.GTFSStaticData;
 import com.pantone448c.ltccompanion.R;
 
 

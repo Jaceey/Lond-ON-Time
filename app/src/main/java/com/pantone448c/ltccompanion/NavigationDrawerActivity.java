@@ -8,6 +8,7 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.navigation.NavigationView;
+import com.pantone448c.ltccompanion.GTFSData.GTFSStaticData;
 import com.pantone448c.ltccompanion.ui.directions.RouteBuilder;
 
 import androidx.drawerlayout.widget.DrawerLayout;

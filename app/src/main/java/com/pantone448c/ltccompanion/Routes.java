@@ -1,9 +1,8 @@
 package com.pantone448c.ltccompanion;
 
-import android.util.Log;
+import com.pantone448c.ltccompanion.GTFSData.GTFSStaticData;
 
 import java.util.ArrayList;
-import java.util.TreeMap;
 
 /**
  * Contains a singleton to store all the Routes
