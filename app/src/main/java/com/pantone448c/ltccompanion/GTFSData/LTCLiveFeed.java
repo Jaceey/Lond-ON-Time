@@ -1,15 +1,12 @@
-package com.pantone448c.ltccompanion;
+package com.pantone448c.ltccompanion.GTFSData;
 
 import android.util.Log;
 
 import com.google.transit.realtime.GtfsRealtime.FeedEntity;
 import com.google.transit.realtime.GtfsRealtime.VehiclePosition;
-import com.google.transit.realtime.GtfsRealtime.VehicleDescriptor;
 import com.google.transit.realtime.GtfsRealtime.Alert;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate;
-import com.google.transit.realtime.GtfsRealtime.TripDescriptor;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 import java.net.MalformedURLException;

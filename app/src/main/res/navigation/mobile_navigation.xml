@@ -16,6 +16,12 @@
         android:name="com.pantone448c.ltccompanion.ui.routes.RoutesFragment"
         android:label="@string/menu_routes"
         tools:layout="@layout/fragment_routes" />
+
+    <fragment
+        android:id="@+id/nav_directions"
+        android:name="com.pantone448c.ltccompanion.ui.directions.DirectionsFragment"
+        android:label="@string/menu_routes"
+        tools:layout="@layout/fragment_routes" />
     <action android:id="@+id/action_global_nav_routes" app:destination="@id/nav_routes" />
 
     <fragment

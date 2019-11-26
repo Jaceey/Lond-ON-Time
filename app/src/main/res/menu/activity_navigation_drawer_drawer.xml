@@ -13,6 +13,10 @@
             android:icon="@drawable/baseline_directions_bus_black_18dp"
             android:title="@string/menu_routes" />
         <item
+            android:id="@+id/nav_directions"
+            android:icon="@drawable/baseline_directions_bus_black_18dp"
+            android:title="@string/menu_directions" />
+        <item
             android:id="@+id/nav_savedstops"
             android:icon="@drawable/mapbox_ic_check"
             android:title="@string/menu_savedstops" />

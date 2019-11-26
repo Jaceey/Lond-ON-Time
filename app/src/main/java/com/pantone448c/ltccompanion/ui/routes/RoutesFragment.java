@@ -12,7 +12,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.pantone448c.ltccompanion.R;
-import com.pantone448c.ltccompanion.RouteListAdapter;
 
 public class RoutesFragment extends Fragment {
     private Context context;

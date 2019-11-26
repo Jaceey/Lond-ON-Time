@@ -1,10 +1,7 @@
-package com.pantone448c.ltccompanion;
+package com.pantone448c.ltccompanion.ui.routes;
 
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.ColorFilter;
-import android.graphics.PorterDuff;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +10,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.pantone448c.ltccompanion.R;
+import com.pantone448c.ltccompanion.Route;
+import com.pantone448c.ltccompanion.Routes;
 
 public class RouteListAdapter extends RecyclerView.Adapter<RouteListAdapter.ViewHolder> {
 

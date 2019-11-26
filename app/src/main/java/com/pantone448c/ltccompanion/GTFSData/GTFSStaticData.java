@@ -1,10 +1,19 @@
-package com.pantone448c.ltccompanion;
+package com.pantone448c.ltccompanion.GTFSData;
 
 import android.app.Application;
 import android.util.Log;
 
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.Point;
+import com.pantone448c.ltccompanion.Bikes_Allowed;
+import com.pantone448c.ltccompanion.Direction;
+import com.pantone448c.ltccompanion.R;
+import com.pantone448c.ltccompanion.Route;
+import com.pantone448c.ltccompanion.Routes;
+import com.pantone448c.ltccompanion.Stop;
+import com.pantone448c.ltccompanion.StopTime;
+import com.pantone448c.ltccompanion.Trip;
+import com.pantone448c.ltccompanion.Wheelchair_Accessible;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
