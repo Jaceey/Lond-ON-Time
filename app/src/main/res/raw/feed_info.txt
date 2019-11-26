@@ -1,2 +1,2 @@
 feed_publisher_name,feed_publisher_url,feed_lang,feed_start_date,feed_end_date,feed_version
-London Transit,http://www.londontransit.ca,en,20190901,20191124,2019 September_20190730
+London Transit,http://www.londontransit.ca,en,20191124,20200201,2019 November_20191111

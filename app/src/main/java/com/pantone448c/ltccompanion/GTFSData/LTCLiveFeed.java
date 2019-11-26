@@ -21,6 +21,7 @@ public class LTCLiveFeed {
         }
         return _instance;
     }
+
     private LTCLiveFeed()
     {
         try
@@ -36,35 +37,8 @@ public class LTCLiveFeed {
 
     }
 
-    public VehiclePosition[] getVehiclePositions() {
-        try {
-            if (feedThread != null) {
-                feedThread.join(); //wait for the thread to finish executing before we create a new thread
-            }
-            feedThread = new Thread(vehiclePositions);
-            feedThread.start();
-            feedThread.join(); //this seems inneficient, I wonder if there is a way to reuse the same thread for all of this, or one thread for each feed that just constantly pulls data when it's not suspended
-            VehiclePosition[] vehiclePositionsList = new VehiclePosition[vehiclePositions.getEntities().length];
-            int count = 0;
-            for (FeedEntity entity : vehiclePositions.getEntities())
-            {
-                if (entity.hasVehicle())
-                {
-                    vehiclePositionsList[count] = entity.getVehicle();
-                    ++count;
-                }
-            }
-            return vehiclePositionsList;
-        }
-        catch(InterruptedException ex)
-        {
-            Log.e("InterruptedException", ex.getMessage());
-        }
-        return new VehiclePosition[]{}; //return an empty list as a default
-    }
-
     //returns all vehicle positions for a specific routeid
-    public VehiclePosition[] getVehiclePositions(int routeid) {
+    public VehiclePosition[] getVehiclePositions(int routeid, int direction) {
         try {
             if (feedThread != null) {
                 feedThread.join(); //wait for the thread to finish executing before we create a new thread
@@ -81,7 +55,18 @@ public class LTCLiveFeed {
                     {
                         if (Integer.parseInt(entity.getVehicle().getTrip().getRouteId()) == routeid)
                         {
-                            vehiclePositionsList.add(entity.getVehicle());
+                            if (entity.getVehicle().getTrip().hasDirectionId())
+                            {
+                                if (entity.getVehicle().getTrip().getDirectionId() == direction)
+                                {
+                                    vehiclePositionsList.add(entity.getVehicle());
+                                }
+                            }
+                            else //not every route is guaranteed to have a direction, if it doesn't we'll just add it assuming the routeid matches
+                            {
+                                vehiclePositionsList.add(entity.getVehicle());
+                            }
+
                         }
                     }
 
@@ -98,34 +83,7 @@ public class LTCLiveFeed {
         return new VehiclePosition[]{}; //return an empty list as a default
     }
 
-    public TripUpdate[] getTripUpdates() {
-        try {
-            if (feedThread != null) {
-                feedThread.join(); //wait for the thread to finish executing before we create a new thread
-            }
-            feedThread = new Thread(tripUpdates);
-            feedThread.start();
-            feedThread.join(); //this seems inneficient, I wonder if there is a way to reuse the same thread for all of this, or one thread for each feed that just constantly pulls data when it's not suspended
-            TripUpdate[] tripUpdateList = new TripUpdate[tripUpdates.getEntities().length];
-            int count = 0;
-            for (FeedEntity entity : tripUpdates.getEntities())
-            {
-                if (entity.hasTripUpdate())
-                {
-                    tripUpdateList[count] = entity.getTripUpdate();
-                    ++count;
-                }
-            }
-            return tripUpdateList;
-        }
-        catch(InterruptedException ex)
-        {
-            Log.e("InterruptedException", ex.getMessage());
-        }
-        return new TripUpdate[]{}; //return an empty list as a default
-    }
-
-    public TripUpdate[] getTripUpdates(int routeid) {
+    public TripUpdate[] getTripUpdates(int routeid, int direction) {
         try {
             if (feedThread != null) {
                 feedThread.join(); //wait for the thread to finish executing before we create a new thread
@@ -140,7 +98,17 @@ public class LTCLiveFeed {
                 {
                     if (Integer.parseInt(entity.getTripUpdate().getTrip().getRouteId()) == routeid)
                     {
-                        tripUpdateList.add(entity.getTripUpdate());
+                        if (entity.getTripUpdate().getTrip().hasDirectionId())
+                        {
+                            if (entity.getTripUpdate().getTrip().getDirectionId() == direction)
+                            {
+                                tripUpdateList.add(entity.getTripUpdate());
+                            }
+                        }
+                        else
+                        {
+                            tripUpdateList.add(entity.getTripUpdate());
+                        }
                     }
 
                 }
