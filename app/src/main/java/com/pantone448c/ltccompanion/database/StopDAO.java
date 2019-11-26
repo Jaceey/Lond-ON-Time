@@ -18,7 +18,7 @@ public interface StopDAO {
     public LiveData<List<Stop>> getStops();
 
     @Query("select * from freq_stops where stop_id=:stopid")
-    public Stop getStopByID(int stopid);
+    public List<Stop> getStopByID(int stopid);
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     public void insertStop(Stop stop);

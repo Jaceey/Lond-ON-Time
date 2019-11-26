@@ -22,4 +22,12 @@
         android:name="com.pantone448c.ltccompanion.ui.directions.DirectionsFragment"
         android:label="@string/menu_routes"
         tools:layout="@layout/fragment_routes" />
+    <action android:id="@+id/action_global_nav_routes" app:destination="@id/nav_routes" />
+
+    <fragment
+        android:id="@+id/nav_savedstops"
+        android:name="com.pantone448c.ltccompanion.ui.savedstops.SavedStopsFragment"
+        android:label="@string/menu_savedstops"
+        tools:layout="@layout/fragment_savedstops" />
+    <action android:id="@+id/action_global_nav_savedstops" app:destination="@id/nav_savedstops" />
 </navigation>
