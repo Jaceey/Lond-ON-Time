@@ -1,7 +1,11 @@
 package com.pantone448c.ltccompanion;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
+import android.util.Log;
 import android.view.MenuItem;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
@@ -23,12 +27,17 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.view.Menu;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class NavigationDrawerActivity extends AppCompatActivity {
 
     private AppBarConfiguration mAppBarConfiguration;
     private StopViewModel stopViewModel;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,4 +113,80 @@ public class NavigationDrawerActivity extends AppCompatActivity {
         }
     }
 
+ /*   public void OnFirstButtonClick(View view) {
+        alert = new AlertDialog.Builder(this);
+        et = new EditText(this);
+
+        tv = findViewById(R.id.routeText);
+
+        view.getParent();
+
+        Button btn = view.findViewById(R.id.buttonDir1);
+        TextView tv = view.findViewById(R.id.routeText);
+
+        Log.i("BUTTON CLICK ID:", "Value: " + btn.getText());
+
+        alert.setTitle("You clicked Route: " + btn.getText());
+
+        //alert.setMessage("Route name: " + tv.getText());
+
+        // Set an EditText view to get user input
+        alert.setView(et);
+
+        alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                // Do something with value...
+                Toast.makeText(getApplicationContext(),"Marker Creation Accepted!",Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                // Cancelled
+                Toast.makeText(getApplicationContext(),"Marker Creation Cancelled!",Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        alert.show();
+
+    }
+
+    public void OnSecondButtonClick(View view) {
+        alert = new AlertDialog.Builder(this);
+        et = new EditText(this);
+
+        tv = findViewById(R.id.routeText);
+
+        Button btn = view.findViewById(R.id.buttonDir2);
+
+        Log.i("BUTTON CLICK ID:", "Value: " + btn.getText());
+
+        alert.setTitle("You clicked Route: " + btn.getText());
+
+        alert.setMessage("Set the title of your new marker");
+
+        // Set an EditText view to get user input
+        alert.setView(et);
+
+        alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                // Do something with value...
+                Toast.makeText(getApplicationContext(),"Marker Creation Accepted!",Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                // Cancelled
+                Toast.makeText(getApplicationContext(),"Marker Creation Cancelled!",Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        alert.show();
+
+    }*/
 }

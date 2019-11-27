@@ -104,6 +104,7 @@ public class GTFSStaticData {
     {
         ArrayList<Trip> trips = new ArrayList<>();
         InputStream in = context.getResources().openRawResource(R.raw.trips);
+
         Reader read = new InputStreamReader(in);
         try
         {
@@ -112,8 +113,10 @@ public class GTFSStaticData {
             int tripCount = 0;
             for (CSVRecord record :records)
             {
+                Log.i("READING TRIP FILE ", record.toString());
                 if (count > 0) {
                     if (Integer.parseInt(record.get(0)) == route_id && Integer.parseInt(record.get(5)) == direction) {
+                        Log.i("ROUTE MATCHED", record.get(0).toString());
                         if (tripCount < numTrips) {
                             int service_id = Integer.parseInt(record.get(1));
                             int trip_id = Integer.parseInt(record.get(2));
@@ -361,11 +364,14 @@ public class GTFSStaticData {
      */
     public static final Feature[] getStopsAsFeatures(int routeid, int direction)
     {
+        Log.i("MADE IT HERE", "routeid is: " + routeid + " direction: " + direction);
         ArrayList<Feature> features = new ArrayList<>();
         InputStream in = context.getResources().openRawResource(R.raw.stops);
         Reader read = new InputStreamReader(in);
 
         Trip trip = getTrips(routeid, direction, 1)[0]; //only need the first trip to find all the stops associated with it, need the trip info because thats what allows us to associate the routeid with stops
+        Log.i("TRIP INFORMATION:", "testing: " + trip.ROUTE_ID);
+
         StopTime[] stopTimes = getStopTimes(trip.TRIP_ID); //need stopTimes as they allow us to associate a tripid with specific stop locations
         try
         {
@@ -380,7 +386,10 @@ public class GTFSStaticData {
                         if (Integer.parseInt(record.get(0)) == stopTimes[i].STOP_ID)
                         {
                             int stop_id = Integer.parseInt((record.get(0)));
-                            int stop_code = Integer.parseInt((record.get(1)));
+                            int stop_code = 0;
+                            if (record.get(1) != "") {
+                                stop_code = Integer.parseInt((record.get(1)));
+                            }
                             String stop_name = record.get(2);
                             float stop_lat = Float.parseFloat(record.get(4));
                             float stop_lon = Float.parseFloat(record.get(5));

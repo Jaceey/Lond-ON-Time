@@ -142,7 +142,26 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Perm
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
 
-        featureCollection = FeatureCollection.fromFeatures(GTFSStaticData.getStopsAsFeatures());
+        //featureCollection = FeatureCollection.fromFeatures(GTFSStaticData.getStopsAsFeatures());
+
+        Bundle arguments = getArguments();
+
+        if (arguments != null) {
+            int routeId = getArguments().getInt("routeid");
+            String direct = getArguments().getString("direction");
+            int temp = 3;
+
+            if (direct == "North" || direct == "East")
+                temp = 0;
+            else if (direct == "South" || direct == "West")
+                temp = 1;
+
+            if (routeId != 0 && temp != 3) {
+                featureCollection = FeatureCollection.fromFeatures(GTFSStaticData.getStopsAsFeatures(routeId, temp));
+            }
+
+        }
+
         symbolOptions = new ArrayList<>();
     }
 
@@ -172,25 +191,27 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Perm
                 symbolManager.setTextAllowOverlap(true);
 
                 //Set up the symbols from the featurecollection
-                Gson gson = new Gson();
-                for(Feature feat : featureCollection.features()){
-                    try {
-                        JSONObject jsonObj = new JSONObject();
-                        jsonObj.put("stop_id", feat.getNumberProperty("stop_id"));
-                        jsonObj.put("stop_code", feat.getNumberProperty("stop_code"));
-                        jsonObj.put("stop_name", feat.getStringProperty("stop_name"));
+                if (featureCollection != null) {
+                    Gson gson = new Gson();
+                    for (Feature feat : featureCollection.features()) {
+                        try {
+                            JSONObject jsonObj = new JSONObject();
+                            jsonObj.put("stop_id", feat.getNumberProperty("stop_id"));
+                            jsonObj.put("stop_code", feat.getNumberProperty("stop_code"));
+                            jsonObj.put("stop_name", feat.getStringProperty("stop_name"));
 
-                        symbolOptions.add(
-                                new SymbolOptions()
-                                        .withGeometry((Point)feat.geometry())
-                                        .withIconImage("bus-11")
-                                        .withData(gson.fromJson(jsonObj.toString(), JsonElement.class))
-                                        .withTextField(feat.getStringProperty("stop_name"))
-                                        .withTextOpacity(0.0f)  //Hides the stop name from the map
-                        );
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                        Log.e(getString(R.string.debug_tag), e.getMessage());
+                            symbolOptions.add(
+                                    new SymbolOptions()
+                                            .withGeometry((Point) feat.geometry())
+                                            .withIconImage("bus-11")
+                                            .withData(gson.fromJson(jsonObj.toString(), JsonElement.class))
+                                            .withTextField(feat.getStringProperty("stop_name"))
+                                            .withTextOpacity(0.0f)  //Hides the stop name from the map
+                            );
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            Log.e(getString(R.string.debug_tag), e.getMessage());
+                        }
                     }
                 }
                 Log.d(getString(R.string.debug_tag), symbolOptions.size() + " stops loaded");

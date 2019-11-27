@@ -14,7 +14,7 @@
             android:title="@string/menu_routes" />
         <item
             android:id="@+id/nav_directions"
-            android:icon="@drawable/baseline_directions_bus_black_18dp"
+            android:icon="@drawable/directions"
             android:title="@string/menu_directions" />
         <item
             android:id="@+id/nav_savedstops"

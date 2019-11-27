@@ -5,13 +5,22 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.pantone448c.ltccompanion.R;
+
+import static com.mapbox.mapboxsdk.Mapbox.getApplicationContext;
 
 public class RoutesFragment extends Fragment {
     private Context context;
@@ -37,13 +46,17 @@ public class RoutesFragment extends Fragment {
         routesFragmentView = inflater.inflate(R.layout.fragment_routes, container, false);
         recyclerView = routesFragmentView.findViewById(R.id.routesRecycler);
 
+
+
         recyclerView.setHasFixedSize(true);
 
         layoutManager = new LinearLayoutManager(context);
         recyclerView.setLayoutManager(layoutManager);
 
+
         mAdapter = new RouteListAdapter();
         recyclerView.setAdapter(mAdapter);
+
         return routesFragmentView;
     }
 
