@@ -45,6 +45,7 @@ public class DirectionsAdapter extends RecyclerView.Adapter<DirectionsAdapter.Vi
 
     public class TransitViewHolder extends DirectionsAdapter.ViewHolder
     {
+        TextView route;
         TextView initialStop;
         TextView finalStop;
         TextView arrivalTime;
@@ -53,6 +54,7 @@ public class DirectionsAdapter extends RecyclerView.Adapter<DirectionsAdapter.Vi
         public TransitViewHolder(View itemView)
         {
             super(itemView);
+            route = itemView.findViewById(R.id.routeVal);
             distance = itemView.findViewById(R.id.distanceValT);
             duration = itemView.findViewById(R.id.durationValT);
             instructions = itemView.findViewById(R.id.directionsT);
@@ -112,6 +114,7 @@ public class DirectionsAdapter extends RecyclerView.Adapter<DirectionsAdapter.Vi
         {
             TransitViewHolder tHolder = (TransitViewHolder)holder;
             TransitStep step = (TransitStep)steps[position];
+            tHolder.route.setText(step.transit_details.line.name);
             tHolder.numStops.setText(String.valueOf(step.transit_details.num_stops));
             tHolder.departureTime.setText(step.transit_details.departure_time.text);
             tHolder.arrivalTime.setText(step.transit_details.arrival_time.text);
