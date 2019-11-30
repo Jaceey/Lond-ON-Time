@@ -76,6 +76,11 @@ public class DirectionsFragment extends Fragment {
     private void getDirections()
     {
         TransitTrip trip = RouteBuilder.getDirections(startAddress.getText().toString(), endAddress.getText().toString());
+        if (trip.routes.length == 0)
+        {
+            Toast.makeText(context, "No results found!", Toast.LENGTH_LONG).show();
+            return;
+        }
         Step[] steps = convertSteps(trip.routes[0].legs[0].steps);
         adapter.setSteps(steps);
     }
