@@ -40,8 +40,10 @@
 
     <string name="placeholder">Placeholder</string>
 
-    <string name="mapbox_cust_style">mapbox://styles/gensyll/ck2z4iba743mz1cp874euyhqf</string>
+    <!-- Stop Times Fragment -->
+    <string name="favourite">Favourite</string>
+    <string name="refreshnext">Refresh in...</string>
+    <string name="refreshnow">Refresh Now</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="mapbox_cust_style">mapbox://styles/gensyll/ck2z4iba743mz1cp874euyhqf</string>
 </resources>

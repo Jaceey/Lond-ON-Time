@@ -3,7 +3,6 @@ package com.pantone448c.ltccompanion.ui.savedstops;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -11,14 +10,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.pantone448c.ltccompanion.R;
 import com.pantone448c.ltccompanion.SavedStopsAdapter;
 import com.pantone448c.ltccompanion.Stop;
-import com.pantone448c.ltccompanion.ui.mapbox.MapBoxFragment;
 import com.pantone448c.ltccompanion.viewmodels.StopViewModel;
 
 import java.util.ArrayList;
