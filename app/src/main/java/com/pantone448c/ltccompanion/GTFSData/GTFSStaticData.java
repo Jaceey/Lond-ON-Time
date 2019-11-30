@@ -12,6 +12,7 @@ import com.pantone448c.ltccompanion.Route;
 import com.pantone448c.ltccompanion.Routes;
 import com.pantone448c.ltccompanion.Stop;
 import com.pantone448c.ltccompanion.StopTime;
+import com.pantone448c.ltccompanion.StopTimesByTrip;
 import com.pantone448c.ltccompanion.Trip;
 import com.pantone448c.ltccompanion.Wheelchair_Accessible;
 
@@ -27,6 +28,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -251,38 +254,40 @@ public class GTFSStaticData {
 
     /**
      *
-     * @param tripid the id of the trip that we'll be looking up stops for
      * @return list of stoptimes
      */
-    public static final StopTime[] getStopTimes(int tripid)
+    public static final HashMap<Integer, StopTime[]> getStopTimes()
     {
         ArrayList<StopTime> stopTimes = new ArrayList<>();
         InputStream in = context.getResources().openRawResource(R.raw.stop_times);
         Reader read = new InputStreamReader(in);
-        boolean found = false;
+        HashMap<Integer, StopTime[]> stopTimesByTripId = new HashMap<>();
         try
         {
             Iterable<CSVRecord> records = CSVFormat.RFC4180.parse(read);
+            int previousvalue = 0;
             int count = 0;
             for (CSVRecord record: records)
             {
                 if (count > 0)
                 {
-                    int test = Integer.parseInt(record.get(0));
-                    if (Integer.parseInt(record.get(0)) == tripid)
+                    int trip_id = Integer.parseInt(record.get(0));
+                    String arrival_time = record.get(1);
+                    String departure_time = record.get(2);
+                    int stop_id = Integer.parseInt(record.get(3));
+                    int stop_sequence = Integer.parseInt(record.get(4));
+                    if (count > 1)
                     {
-                        found = true;
-                        int trip_id = Integer.parseInt(record.get(0));
-                        String arrival_time = record.get(1);
-                        String departure_time = record.get(2);
-                        int stop_id = Integer.parseInt(record.get(3));
-                        int stop_sequence = Integer.parseInt(record.get(4));
-                        stopTimes.add(new StopTime(trip_id, arrival_time, departure_time, stop_id, stop_sequence));
+                        if (previousvalue != trip_id)
+                        {
+                            StopTime[] stopTimesArray = new StopTime[stopTimes.size()];
+                            stopTimesArray = stopTimes.toArray(stopTimesArray);
+                            stopTimesByTripId.put(previousvalue, stopTimesArray);
+                            stopTimes.clear();
+                        }
                     }
-                    if (found && Integer.parseInt(record.get(0)) != tripid) //data is already ordered so if we've found the tripid and it's no longer matching up, then we've found all the stops for that trip
-                    {
-                        break;
-                    }
+                    stopTimes.add(new StopTime(trip_id, arrival_time, departure_time, stop_id, stop_sequence));
+                    previousvalue = trip_id;
                 }
                 ++count;
             }
@@ -295,11 +300,9 @@ public class GTFSStaticData {
         {
             Log.e("IndexOutofRange", ex.getMessage());
         }
-
-        StopTime[] stopTimesArray = new StopTime[stopTimes.size()];
-        stopTimesArray = stopTimes.toArray(stopTimesArray);
-        return stopTimesArray;
+        return stopTimesByTripId;
     }
+
 
     /**
      *
@@ -307,14 +310,25 @@ public class GTFSStaticData {
      * @param direction the direction of the route
      * @return list of stops
      */
+
     public static final Stop[] getStops(int routeid, int direction)
     {
         ArrayList<Stop> stops = new ArrayList<>();
         InputStream in = context.getResources().openRawResource(R.raw.stops);
         Reader read = new InputStreamReader(in);
 
-        Trip trip = getTrips(routeid, direction, 1)[0]; //only need the first trip to find all the stops associated with it, need the trip info because thats what allows us to associate the routeid with stops
-        StopTime[] stopTimes = getStopTimes(trip.TRIP_ID); //need stopTimes as they allow us to associate a tripid with specific stop locations
+        Trip[] trips = getTrips(routeid, direction); //only need the first trip to find all the stops associated with it, need the trip info because thats what allows us to associate the routeid with stops
+
+        HashMap<Integer, StopTime> stopTimesByStop = new HashMap<>();
+        for (int i=0; i<trips.length; ++i)
+        {
+            StopTime[] stopTimes = StopTimesByTrip.getStopsByID(trips[i].TRIP_ID);
+            for (int n=0; n<stopTimes.length; ++n)
+            {
+                stopTimesByStop.put(stopTimes[n].STOP_ID, stopTimes[n]);
+            }
+        }
+
         try
         {
             Iterable<CSVRecord> records = CSVFormat.RFC4180.parse(read);
@@ -323,9 +337,10 @@ public class GTFSStaticData {
             {
                 if (count > 0)
                 {
-                    for (int i=0; i<stopTimes.length; ++i) //will probably sort this list to make search times faster if it's too slow
+                    for (Map.Entry<Integer, StopTime> element : stopTimesByStop.entrySet()) //will probably sort this list to make search times faster if it's too slow
                     {
-                        if (Integer.parseInt(record.get(0)) == stopTimes[i].STOP_ID)
+                        StopTime stopTime = element.getValue();
+                        if (Integer.parseInt(record.get(0)) == stopTime.STOP_ID)
                         {
                             int stop_id = Integer.parseInt((record.get(0)));
                             int stop_code = Integer.parseInt((record.get(1)));
@@ -354,8 +369,6 @@ public class GTFSStaticData {
         return  stopsArray;
     }
 
-
-
     /**
      *
      * @param routeid the route that we want to look up stops for
@@ -364,15 +377,22 @@ public class GTFSStaticData {
      */
     public static final Feature[] getStopsAsFeatures(int routeid, int direction)
     {
-        Log.i("MADE IT HERE", "routeid is: " + routeid + " direction: " + direction);
         ArrayList<Feature> features = new ArrayList<>();
         InputStream in = context.getResources().openRawResource(R.raw.stops);
         Reader read = new InputStreamReader(in);
 
-        Trip trip = getTrips(routeid, direction, 1)[0]; //only need the first trip to find all the stops associated with it, need the trip info because thats what allows us to associate the routeid with stops
-        Log.i("TRIP INFORMATION:", "testing: " + trip.ROUTE_ID);
+        Trip[] trips = getTrips(routeid, direction); //only need the first trip to find all the stops associated with it, need the trip info because thats what allows us to associate the routeid with stops
 
-        StopTime[] stopTimes = getStopTimes(trip.TRIP_ID); //need stopTimes as they allow us to associate a tripid with specific stop locations
+        HashMap<Integer, StopTime> stopTimesByStop = new HashMap<>();
+        for (int i=0; i<trips.length; ++i)
+        {
+            StopTime[] stopTimes = StopTimesByTrip.getStopsByID(trips[i].TRIP_ID);
+            for (int n=0; n<stopTimes.length; ++n)
+            {
+                stopTimesByStop.put(stopTimes[n].STOP_ID, stopTimes[n]);
+            }
+        }
+
         try
         {
             Iterable<CSVRecord> records = CSVFormat.RFC4180.parse(read);
@@ -381,9 +401,10 @@ public class GTFSStaticData {
             {
                 if (count > 0)
                 {
-                    for (int i=0; i<stopTimes.length; ++i)
+                    for (Map.Entry<Integer, StopTime> element : stopTimesByStop.entrySet())
                     {
-                        if (Integer.parseInt(record.get(0)) == stopTimes[i].STOP_ID)
+                        StopTime stopTime = element.getValue();
+                        if (Integer.parseInt(record.get(0)) == stopTime.STOP_ID)
                         {
                             int stop_id = Integer.parseInt((record.get(0)));
                             int stop_code = 0;

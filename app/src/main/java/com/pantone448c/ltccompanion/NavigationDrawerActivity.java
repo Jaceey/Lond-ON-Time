@@ -1,11 +1,7 @@
 package com.pantone448c.ltccompanion;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 
-import android.util.Log;
 import android.view.MenuItem;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
@@ -15,9 +11,7 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.navigation.NavigationView;
-import com.google.transit.realtime.GtfsRealtime;
 import com.pantone448c.ltccompanion.GTFSData.GTFSStaticData;
-import com.pantone448c.ltccompanion.GTFSData.LTCLiveFeed;
 import com.pantone448c.ltccompanion.ui.directions.RouteBuilder;
 import com.pantone448c.ltccompanion.ui.mapbox.MapBoxFragment;
 import com.pantone448c.ltccompanion.ui.savedstops.SavedStopsFragment;
@@ -29,10 +23,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.view.Menu;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 public class NavigationDrawerActivity extends AppCompatActivity {
@@ -46,6 +36,7 @@ public class NavigationDrawerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         GTFSStaticData.initContext(this.getApplication());
         RouteBuilder.initRetroFit();
+        StopTimesByTrip.loadStopTimes();
         setContentView(R.layout.activity_navigation_drawer);
 
         //StopViewModel
