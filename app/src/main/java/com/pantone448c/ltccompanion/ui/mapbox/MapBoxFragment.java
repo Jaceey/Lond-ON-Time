@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.location.Location;
 import android.os.Bundle;
@@ -17,7 +18,6 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.android.core.location.LocationEngineCallback;
 import com.mapbox.android.core.location.LocationEngineProvider;
@@ -27,7 +27,6 @@ import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.android.core.permissions.PermissionsManager;
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.FeatureCollection;
-import com.mapbox.geojson.Geometry;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
@@ -43,24 +42,19 @@ import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.mapboxsdk.plugins.annotation.OnSymbolClickListener;
-import com.mapbox.mapboxsdk.plugins.annotation.OnSymbolLongClickListener;
 import com.mapbox.mapboxsdk.plugins.annotation.Symbol;
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager;
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions;
 import com.mapbox.mapboxsdk.plugins.building.BuildingPlugin;
-import com.mapbox.mapboxsdk.plugins.markerview.MarkerViewManager;
 import com.pantone448c.ltccompanion.GTFSData.GTFSStaticData;
 import com.pantone448c.ltccompanion.R;
-import com.pantone448c.ltccompanion.Stop;
-import com.pantone448c.ltccompanion.ui.savedstops.SavedStopsFragment;
+import com.pantone448c.ltccompanion.ui.stoptimes.StopTimesActivity;
 
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.InputStream;
 import java.lang.ref.WeakReference;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -222,13 +216,20 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Perm
                     public void onAnnotationClick(Symbol symbol){
                         JsonElement jsonElement = symbol.getData();
                         int jsonResult = Integer.parseInt(jsonElement.getAsJsonObject().get("stop_id").toString());
+                        //TODO: Open the stop times fragment, passing in the stop id
+                        Intent intent = new Intent(getActivity(), StopTimesActivity.class);
+                        intent.putExtra("stopid", jsonResult);
+                        startActivity(intent);
+
+                        /*JsonElement jsonElement = symbol.getData();
+                        int jsonResult = Integer.parseInt(jsonElement.getAsJsonObject().get("stop_id").toString());
                         //Toast.makeText(getContext(), symbol.getTextField(), Toast.LENGTH_SHORT).show();
                         SavedStopsFragment.stopViewModel.insertStop(GTFSStaticData.getStop(jsonResult));
-                        Toast.makeText(getContext(), jsonElement.getAsJsonObject().get("stop_name").toString() + " favourited!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), jsonElement.getAsJsonObject().get("stop_name").toString() + " favourited!", Toast.LENGTH_SHORT).show();*/
                     }
                 });
 
-                symbolManager.addLongClickListener(new OnSymbolLongClickListener() {
+                /*symbolManager.addLongClickListener(new OnSymbolLongClickListener() {
                     @Override
                     public void onAnnotationLongClick(Symbol symbol) {
                         JsonElement jsonElement = symbol.getData();
@@ -240,9 +241,9 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Perm
                         /*}else{
                             SavedStopsFragment.stopViewModel.insertStop(GTFSStaticData.getStop(jsonResult));
                             Toast.makeText(getContext(), "Stop " + jsonResult + " favourited!", Toast.LENGTH_SHORT).show();
-                        }*/
+                        }
                     }
-                });
+                });*/
             }
         });
 
