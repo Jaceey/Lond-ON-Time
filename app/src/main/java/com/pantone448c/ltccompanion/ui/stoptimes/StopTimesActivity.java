@@ -17,6 +17,7 @@ import com.google.gson.JsonElement;
 import com.mapbox.geojson.Feature;
 import com.pantone448c.ltccompanion.GTFSData.GTFSStaticData;
 import com.pantone448c.ltccompanion.R;
+import com.pantone448c.ltccompanion.Stop;
 import com.pantone448c.ltccompanion.StopTimesAdapter;
 import com.pantone448c.ltccompanion.ui.savedstops.SavedStopsFragment;
 
@@ -51,6 +52,20 @@ public class StopTimesActivity extends AppCompatActivity {
         textViewCountdown = findViewById(R.id.textViewCountdown);
         recyclerView = findViewById(R.id.timesRecycler);
         favouriteBox = findViewById(R.id.checkboxFav);
+        stopId = getIntent().getExtras().getInt("stopid");
+
+        Stop stop = null;
+        try {
+            stop = SavedStopsFragment.stopViewModel.getStopById(stopId);
+        } catch (Exception ex)
+        {
+
+        }
+
+        if (stop != null)
+        {
+            favouriteBox.setChecked(true);
+        }
 
         favouriteBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener(){
 
@@ -68,8 +83,6 @@ public class StopTimesActivity extends AppCompatActivity {
                 }
             }
         });
-
-        stopId = getIntent().getExtras().getInt("stopid");
         textViewStopId.setText("#" + stopId);
 
         //Create Adapter

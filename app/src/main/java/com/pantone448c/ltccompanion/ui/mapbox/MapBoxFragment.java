@@ -57,6 +57,8 @@ import org.json.JSONObject;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static android.os.Looper.getMainLooper;
 import static com.mapbox.mapboxsdk.style.expressions.Expression.eq;
@@ -153,6 +155,14 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Perm
             if (routeId != 0 && temp != 3) {
                 featureCollection = FeatureCollection.fromFeatures(GTFSStaticData.getStopsAsFeatures(routeId, temp));
             }
+
+            Timer timer = new Timer();
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    Toast.makeText(context, "Test", Toast.LENGTH_SHORT).show();
+                }
+            }, 0, 1000);
 
         }
 

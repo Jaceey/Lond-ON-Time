@@ -9,6 +9,7 @@ import com.pantone448c.ltccompanion.Stop;
 import com.pantone448c.ltccompanion.database.StopRepo;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class StopViewModel extends AndroidViewModel {
     private StopRepo stopRepo;
@@ -26,9 +27,8 @@ public class StopViewModel extends AndroidViewModel {
         return stops;
     }
 
-    public Stop getStopById(Stop stop){
-        stopRepo.getStopByID(stop);
-        return stopRepo.getFirstResult();
+    public Stop getStopById(int stopID) throws ExecutionException, InterruptedException {
+        return stopRepo.getStopByID(stopID);
     }
 
     public void insertStop(Stop stop)
