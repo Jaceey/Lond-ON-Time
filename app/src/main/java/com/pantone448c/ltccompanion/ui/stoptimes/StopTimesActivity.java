@@ -6,11 +6,19 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.view.View;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.android.material.chip.ChipGroup;
+import com.google.gson.JsonElement;
+import com.mapbox.geojson.Feature;
 import com.pantone448c.ltccompanion.GTFSData.GTFSStaticData;
 import com.pantone448c.ltccompanion.R;
 import com.pantone448c.ltccompanion.StopTimesAdapter;
+import com.pantone448c.ltccompanion.ui.savedstops.SavedStopsFragment;
 
 public class StopTimesActivity extends AppCompatActivity {
 
@@ -18,6 +26,8 @@ public class StopTimesActivity extends AppCompatActivity {
     private int stopId;
     private TextView textViewStopId, textViewCountdown;
     private RecyclerView recyclerView;
+
+    private CheckBox favouriteBox;
 
     //Setup countdown timer for refreshing
     private CountDownTimer timer = new CountDownTimer(60000, 1000) {
@@ -40,6 +50,24 @@ public class StopTimesActivity extends AppCompatActivity {
         textViewStopId = findViewById(R.id.textViewStopId);
         textViewCountdown = findViewById(R.id.textViewCountdown);
         recyclerView = findViewById(R.id.timesRecycler);
+        favouriteBox = findViewById(R.id.checkboxFav);
+
+        favouriteBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener(){
+
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+                if (isChecked) {
+                    Toast.makeText(getBaseContext(), "Stop " + stopId + " favourited!", Toast.LENGTH_SHORT).show();
+                    SavedStopsFragment.stopViewModel.insertStop(GTFSStaticData.getStop(stopId));
+                }
+                else
+                {
+
+                    Toast.makeText(getBaseContext(), "Stop " + stopId + " unfavourited!", Toast.LENGTH_SHORT).show();
+                    SavedStopsFragment.stopViewModel.deleteStop(GTFSStaticData.getStop(stopId));
+                }
+            }
+        });
 
         stopId = getIntent().getExtras().getInt("stopid");
         textViewStopId.setText("#" + stopId);
@@ -57,4 +85,5 @@ public class StopTimesActivity extends AppCompatActivity {
         adapter.refreshTimes(GTFSStaticData.getBusesForStop(stopId, 50));
         timer.start();
     }
+
 }
