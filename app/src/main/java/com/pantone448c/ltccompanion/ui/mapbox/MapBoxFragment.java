@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import com.google.transit.realtime.GtfsRealtime;
 import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.android.core.location.LocationEngineCallback;
 import com.mapbox.android.core.location.LocationEngineProvider;
@@ -25,10 +26,13 @@ import com.mapbox.android.core.location.LocationEngineRequest;
 import com.mapbox.android.core.location.LocationEngineResult;
 import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.android.core.permissions.PermissionsManager;
+import com.mapbox.android.gestures.MoveGestureDetector;
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.FeatureCollection;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
+import com.mapbox.mapboxsdk.annotations.Marker;
+import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
@@ -47,6 +51,7 @@ import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager;
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions;
 import com.mapbox.mapboxsdk.plugins.building.BuildingPlugin;
 import com.pantone448c.ltccompanion.GTFSData.GTFSStaticData;
+import com.pantone448c.ltccompanion.GTFSData.LTCLiveFeed;
 import com.pantone448c.ltccompanion.R;
 import com.pantone448c.ltccompanion.ui.stoptimes.StopTimesActivity;
 
@@ -94,6 +99,7 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Perm
     private long DEFAULT_MAX_WAIT_TIME = DEFAULT_INTERVAL_IN_MILLISECONDS * 3;
     private MapBoxActivityLocationCallback callback = new MapBoxActivityLocationCallback(this);
     public static LatLng lastDeviceLocation = LONDON_COORDS;
+    private ArrayList<Marker> busMarkers;
 
     //Mapbox Symbol/Marker Generation
     private FeatureCollection featureCollection;    /* A GeoJSON collection, used to store locations for markers in Mapbox */
@@ -129,7 +135,7 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Perm
     {
         super.onActivityCreated(savedInstanceState);
         //setContentView(R.layout.fragment_map_box);
-
+        busMarkers = new ArrayList<>();
         /*Mapbox access token configured here*/
         Mapbox.getInstance(context, getResources().getString(R.string.mapbox_key));
         mapView = new MapView(context);
@@ -156,17 +162,34 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Perm
                 featureCollection = FeatureCollection.fromFeatures(GTFSStaticData.getStopsAsFeatures(routeId, temp));
             }
 
-            Timer timer = new Timer();
-            timer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    Toast.makeText(context, "Test", Toast.LENGTH_SHORT).show();
-                }
-            }, 0, 1000);
-
         }
 
         symbolOptions = new ArrayList<>();
+    }
+
+    private void drawLiveBuses(int routeid, int direction)
+    {
+        GtfsRealtime.VehiclePosition[] vehiclePositions = LTCLiveFeed.Instance().getVehiclePositions(routeid, direction);
+        if (busMarkers.size() > 0)
+        {
+            for (int i=0; i<busMarkers.size(); ++i)
+            {
+                mapboxMap.removeMarker(busMarkers.get(i));
+            }
+            busMarkers.clear();
+        }
+        else
+        {
+            for (int i=0; i<vehiclePositions.length; ++i)
+            {
+                LatLng busPosition = new LatLng(vehiclePositions[i].getPosition().getLatitude(), vehiclePositions[i].getPosition().getLongitude());
+                MarkerOptions markerOptions = new MarkerOptions().position(busPosition).setTitle(vehiclePositions[i].getVehicle().getLabel());
+                Marker marker = new Marker(markerOptions);
+                busMarkers.add(marker);
+                mapboxMap.addMarker(markerOptions);
+            }
+        }
+
     }
 
     @SuppressLint("WrongConstant")
@@ -174,6 +197,22 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Perm
     public void onMapReady(@NonNull final MapboxMap mapboxMap){
         //TODO: Initialize Map
         this.mapboxMap = mapboxMap;
+
+        if (getArguments() != null)
+        {
+            mapboxMap.addOnCameraMoveListener(new MapboxMap.OnCameraMoveListener() {
+                @Override
+                public void onCameraMove() {
+                    int temp = 3;
+                    String direct = getArguments().getString("direction");
+                    if (direct == "North" || direct == "East")
+                        temp = 0;
+                    else if (direct == "South" || direct == "West")
+                        temp = 1;
+                    drawLiveBuses(getArguments().getInt("routeid"), temp);
+                }
+            });
+        }
 
         mapboxMap.setStyle(getString(R.string.mapbox_cust_style), new Style.OnStyleLoaded(){  //References unique map style on account
             @Override
