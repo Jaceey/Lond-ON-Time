@@ -2,12 +2,14 @@ package com.pantone448c.ltccompanion.ui.mapbox;
 
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
@@ -31,6 +33,8 @@ import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.FeatureCollection;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
+import com.mapbox.mapboxsdk.annotations.Icon;
+import com.mapbox.mapboxsdk.annotations.IconFactory;
 import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
@@ -50,9 +54,12 @@ import com.mapbox.mapboxsdk.plugins.annotation.Symbol;
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager;
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions;
 import com.mapbox.mapboxsdk.plugins.building.BuildingPlugin;
+import com.mapbox.mapboxsdk.plugins.markerview.MarkerView;
 import com.pantone448c.ltccompanion.GTFSData.GTFSStaticData;
 import com.pantone448c.ltccompanion.GTFSData.LTCLiveFeed;
 import com.pantone448c.ltccompanion.R;
+import com.pantone448c.ltccompanion.Route;
+import com.pantone448c.ltccompanion.Routes;
 import com.pantone448c.ltccompanion.ui.stoptimes.StopTimesActivity;
 
 
@@ -170,26 +177,52 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Perm
     private void drawLiveBuses(int routeid, int direction)
     {
         GtfsRealtime.VehiclePosition[] vehiclePositions = LTCLiveFeed.Instance().getVehiclePositions(routeid, direction);
-        if (busMarkers.size() > 0)
-        {
-            for (int i=0; i<busMarkers.size(); ++i)
-            {
-                mapboxMap.removeMarker(busMarkers.get(i));
-            }
-            busMarkers.clear();
-        }
-        else
-        {
-            for (int i=0; i<vehiclePositions.length; ++i)
-            {
-                LatLng busPosition = new LatLng(vehiclePositions[i].getPosition().getLatitude(), vehiclePositions[i].getPosition().getLongitude());
-                MarkerOptions markerOptions = new MarkerOptions().position(busPosition).setTitle(vehiclePositions[i].getVehicle().getLabel());
-                Marker marker = new Marker(markerOptions);
-                busMarkers.add(marker);
-                mapboxMap.addMarker(markerOptions);
-            }
+
+        List<Marker> mapMarkers = new ArrayList<>();
+
+        for (Marker marker : mapboxMap.getMarkers()){
+            mapMarkers.add(marker);
         }
 
+            for (int i=0; i<vehiclePositions.length; ++i)
+            {
+                Route route = Routes.getRoute(routeid);
+
+                IconFactory iconFactory = IconFactory.getInstance(context);
+                Drawable iconDrawable = ContextCompat.getDrawable(context, R.drawable.buslogo);
+                Icon icon = iconFactory.fromResource(R.drawable.baseline_directions_bus_black_18dp);
+
+                LatLng busPosition = new LatLng(vehiclePositions[i].getPosition().getLatitude(), vehiclePositions[i].getPosition().getLongitude());
+                MarkerOptions markerOptions = new MarkerOptions().position(busPosition).setTitle(route.ROUTE_NAME + " Bus#: " + vehiclePositions[i].getVehicle().getLabel())
+                        .setSnippet("Capacity: " + vehiclePositions[i].getOccupancyStatus()).setIcon(icon);
+
+                if (busMarkers.size() > 0)
+                {
+                    for (Marker m : busMarkers)
+                    {
+                        for (Marker map : mapMarkers)
+                        {
+                            if (m.getTitle() == map.getTitle()){
+                                map.setPosition(markerOptions.getPosition());
+                            }
+                        }
+                    }
+                }
+                else {
+                      //  if (busMarkers.get(i).getTitle() == markerOptions.getTitle()) {
+                       //     busMarkers.get(i).setPosition(markerOptions.getPosition());
+                       // } else {
+                            Marker marker = new Marker(markerOptions);
+                            busMarkers.add(marker);
+                        //}
+
+                    // Marker marker = new Marker(markerOptions);
+                    // busMarkers.add(marker);
+                    mapboxMap.addMarker(markerOptions);
+                }
+
+
+            }
     }
 
     @SuppressLint("WrongConstant")
@@ -209,6 +242,7 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Perm
                         temp = 0;
                     else if (direct == "South" || direct == "West")
                         temp = 1;
+
                     drawLiveBuses(getArguments().getInt("routeid"), temp);
                 }
             });
