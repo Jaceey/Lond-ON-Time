@@ -2,12 +2,14 @@ package com.pantone448c.ltccompanion.ui.mapbox;
 
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
@@ -18,6 +20,7 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import com.google.transit.realtime.GtfsRealtime;
 import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.android.core.location.LocationEngineCallback;
 import com.mapbox.android.core.location.LocationEngineProvider;
@@ -25,10 +28,15 @@ import com.mapbox.android.core.location.LocationEngineRequest;
 import com.mapbox.android.core.location.LocationEngineResult;
 import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.android.core.permissions.PermissionsManager;
+import com.mapbox.android.gestures.MoveGestureDetector;
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.FeatureCollection;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
+import com.mapbox.mapboxsdk.annotations.Icon;
+import com.mapbox.mapboxsdk.annotations.IconFactory;
+import com.mapbox.mapboxsdk.annotations.Marker;
+import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
@@ -46,8 +54,12 @@ import com.mapbox.mapboxsdk.plugins.annotation.Symbol;
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager;
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions;
 import com.mapbox.mapboxsdk.plugins.building.BuildingPlugin;
+import com.mapbox.mapboxsdk.plugins.markerview.MarkerView;
 import com.pantone448c.ltccompanion.GTFSData.GTFSStaticData;
+import com.pantone448c.ltccompanion.GTFSData.LTCLiveFeed;
 import com.pantone448c.ltccompanion.R;
+import com.pantone448c.ltccompanion.Route;
+import com.pantone448c.ltccompanion.Routes;
 import com.pantone448c.ltccompanion.ui.stoptimes.StopTimesActivity;
 
 
@@ -57,6 +69,8 @@ import org.json.JSONObject;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static android.os.Looper.getMainLooper;
 import static com.mapbox.mapboxsdk.style.expressions.Expression.eq;
@@ -92,6 +106,7 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Perm
     private long DEFAULT_MAX_WAIT_TIME = DEFAULT_INTERVAL_IN_MILLISECONDS * 3;
     private MapBoxActivityLocationCallback callback = new MapBoxActivityLocationCallback(this);
     public static LatLng lastDeviceLocation = LONDON_COORDS;
+    private ArrayList<Marker> busMarkers;
 
     //Mapbox Symbol/Marker Generation
     private FeatureCollection featureCollection;    /* A GeoJSON collection, used to store locations for markers in Mapbox */
@@ -127,7 +142,7 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Perm
     {
         super.onActivityCreated(savedInstanceState);
         //setContentView(R.layout.fragment_map_box);
-
+        busMarkers = new ArrayList<>();
         /*Mapbox access token configured here*/
         Mapbox.getInstance(context, getResources().getString(R.string.mapbox_key));
         mapView = new MapView(context);
@@ -159,11 +174,79 @@ public class MapBoxFragment extends Fragment implements OnMapReadyCallback, Perm
         symbolOptions = new ArrayList<>();
     }
 
+    private void drawLiveBuses(int routeid, int direction)
+    {
+        GtfsRealtime.VehiclePosition[] vehiclePositions = LTCLiveFeed.Instance().getVehiclePositions(routeid, direction);
+
+        List<Marker> mapMarkers = new ArrayList<>();
+
+        for (Marker marker : mapboxMap.getMarkers()){
+            mapMarkers.add(marker);
+        }
+
+            for (int i=0; i<vehiclePositions.length; ++i)
+            {
+                Route route = Routes.getRoute(routeid);
+
+                IconFactory iconFactory = IconFactory.getInstance(context);
+                Drawable iconDrawable = ContextCompat.getDrawable(context, R.drawable.buslogo);
+                Icon icon = iconFactory.fromResource(R.drawable.baseline_directions_bus_black_18dp);
+
+                LatLng busPosition = new LatLng(vehiclePositions[i].getPosition().getLatitude(), vehiclePositions[i].getPosition().getLongitude());
+                MarkerOptions markerOptions = new MarkerOptions().position(busPosition).setTitle(route.ROUTE_NAME + " Bus#: " + vehiclePositions[i].getVehicle().getLabel())
+                        .setSnippet("Capacity: " + vehiclePositions[i].getOccupancyStatus()).setIcon(icon);
+
+                if (busMarkers.size() > 0)
+                {
+                    for (Marker m : busMarkers)
+                    {
+                        for (Marker map : mapMarkers)
+                        {
+                            if (m.getTitle() == map.getTitle()){
+                                map.setPosition(markerOptions.getPosition());
+                            }
+                        }
+                    }
+                }
+                else {
+                      //  if (busMarkers.get(i).getTitle() == markerOptions.getTitle()) {
+                       //     busMarkers.get(i).setPosition(markerOptions.getPosition());
+                       // } else {
+                            Marker marker = new Marker(markerOptions);
+                            busMarkers.add(marker);
+                        //}
+
+                    // Marker marker = new Marker(markerOptions);
+                    // busMarkers.add(marker);
+                    mapboxMap.addMarker(markerOptions);
+                }
+
+
+            }
+    }
+
     @SuppressLint("WrongConstant")
     @Override
     public void onMapReady(@NonNull final MapboxMap mapboxMap){
         //TODO: Initialize Map
         this.mapboxMap = mapboxMap;
+
+        if (getArguments() != null)
+        {
+            mapboxMap.addOnCameraMoveListener(new MapboxMap.OnCameraMoveListener() {
+                @Override
+                public void onCameraMove() {
+                    int temp = 3;
+                    String direct = getArguments().getString("direction");
+                    if (direct == "North" || direct == "East")
+                        temp = 0;
+                    else if (direct == "South" || direct == "West")
+                        temp = 1;
+
+                    drawLiveBuses(getArguments().getInt("routeid"), temp);
+                }
+            });
+        }
 
         mapboxMap.setStyle(getString(R.string.mapbox_cust_style), new Style.OnStyleLoaded(){  //References unique map style on account
             @Override

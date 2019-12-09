@@ -10,6 +10,7 @@ import com.pantone448c.ltccompanion.Stop;
 
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class StopRepo {
     private StopDAO mStopDao;
@@ -21,7 +22,14 @@ public class StopRepo {
     }
     public Stop getFirstResult(){
         List<Stop> result = (List<Stop>) searchResults.getValue();
-        return result.get(0);
+        if (result != null)
+        {
+            if (result.size() > 0)
+            {
+                return result.get(0);
+            }
+        }
+        return null;
     }
     public StopRepo(Application application)
     {
@@ -35,11 +43,12 @@ public class StopRepo {
         return mFreqStops;
     }
 
-    public void getStopByID(Stop stop){
+    public Stop getStopByID(int stopID) throws ExecutionException, InterruptedException {
         //new insertAsyncTask(mStopDao).execute(stop);
         //return null;
         queryAsyncTask task = new queryAsyncTask(mStopDao, this);
-        task.execute(stop.STOP_ID);
+        task.execute(stopID);
+        return task.get().get(0);
     }
 
     public void insertStop(Stop stop)
